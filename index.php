@@ -16,17 +16,7 @@
 		<script src="../jquery/jquery-3.6.0.js"></script>
 
 		<!-- Importing own scripts here -->
-		<script src="js/formEditor.js"></script>
-
-		<script>
-
-
-
-			
-		</script>
-
-
-
+		<script type="module" src="js/formEditor.js"></script>
 
 	</head>
 	<body>
