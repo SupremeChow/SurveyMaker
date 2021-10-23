@@ -4,10 +4,10 @@ import {addPrefabControlDiv, handleSaveForm, handleEditForm, handleMoveUpForm, h
 
 import{createCheckBoxPrefab, handleCheckPrefabSubmit, CheckBox, checkOption} from './checkBox.js'
 import{createMultChoicePrefab, handleMultPrefabSubmit, MultipleChoice, MultOption} from './multipleChoice.js'
-import{createSelectBoxPrefab} from './selectBox.js'
-import{createShortAnswerPrefab} from './shortAns.js'
-import{createShortParagraphPrefab} from './shortPara.js'
-import{createStarRatingPrefab} from './starRating.js'
+import{createSelectBoxPrefab, handleSelectPrefabSubmit, SelectBox, SelectOption} from './selectBox.js'
+import{createShortAnswerPrefab, handleShortAnsPrefabSubmit, ShortAnswer} from './shortAns.js'
+import{createShortParagraphPrefab, handleShortParaPrefabSubmit, ShortParagraph} from './shortPara.js'
+import{createStarRatingPrefab, updateStarCount, StarRating} from './starRating.js'
 
 
 //_____________________________________________________________________________________________________________		
@@ -17,7 +17,7 @@ import{createStarRatingPrefab} from './starRating.js'
 /** 
  * Better labeling a for inputs, especialy paragraph. Don't rely on defaults to explain what goes in input
 Deleting items, moving (nice to have), duplication
-Remove added options ie to multiple choice or selector box
+Remove added options ie to multiple choice or selector box (important, but for now focus on getting whole system connected)
 Provide require functionality and checker (nice to have)
 
 Main: As classes are moved to seperate files, start implementing state of form tracking here.
@@ -42,6 +42,18 @@ Main: As classes are moved to seperate files, start implementing state of form t
 
         currently, fixed move up/down, need to handle order with delete
         Right now, primarily setting up classes for rest of form types, finish that, then move to delete
+
+
+        !!! Label for Paragraph ?????  Still think maybe not necessar.... ***************
+
+        !!! toJSON for options?????
+
+
+        10/23 Early morning: Main fix now: 
+            * ensure label and header updates change 
+            * delete properly updates state and formList[]
+            * Tie Publish button to creating JSON of state, and test pushing to php
+            * everything else
         
 
 */
@@ -108,7 +120,7 @@ let formList = [];
 //_____________________________________________________________________________________________________________
 //___________________________ Button Handlers for General Form Manipulation __________________________________
 //_____________________________________________________________________________________________________________
-//DO NOT MOVE TO FORMMENUCONTROLS! Need to alter state of formList from here
+//DO NOT MOVE TO FORM MENU CONTROLS! Need to alter state of formList from here
 
 //save Button (leave edit mode)
 $(document).on('click', '.saveButton', (callingButton) =>
@@ -116,8 +128,6 @@ $(document).on('click', '.saveButton', (callingButton) =>
     
     handleSaveForm($(callingButton.target));
 });
-
-
 
 
 
@@ -286,48 +296,6 @@ $(document).on('click', '.selectAddOptionButton', (callingButton) =>
     handleSelectPrefabSubmit($(callingButton.target));
 });
 
-const handleSelectPrefabSubmit = (callingButton) => {
-    
-    let inputOptionId = $(callingButton).attr("selectnewoptionid");
-    let inputOptionValId = $(callingButton).attr("selectnewoptionvalid");
-    let selectBoxId = $(callingButton).attr("selectboxid");
-
-    let selectLabelInputId = $(callingButton).attr("selectLabelInputId");
-    let selectLabelId = $(callingButton).attr("selectLabelId");
-
-    
-
-    let newSelectLabel = $('#' + selectLabelInputId).val();
-    let newOption = $('#' + inputOptionId).val();
-    let newOptionVal = $('#' + inputOptionValId).val();
-
-    if(newOption !== "")
-    {
-        if($('#' + selectBoxId + " option").first().val() == "ReplaceDefault")
-        {
-            $('#' + selectBoxId + " option").replaceWith('<option value = ' + newOptionVal + ' >'+ newOption + '</option>');
-            $('#' + inputOptionId).val("");
-            $('#' + inputOptionValId).val("");
-        }
-        else
-        {
-            $('#' + selectBoxId).append('<option value = ' + newOptionVal + ' >'+ newOption + '</option>');
-            $('#' + inputOptionId).val("");
-            $('#' + inputOptionValId).val("");
-        }
-        
-    }
-
-    /*
-    //publish Title
-    updateTitle(callingButton);
-    //change label infront of selectBox
-    $('#' + selectLabelId).text(newSelectLabel);
-    */
-        
-}
-
-
 
 
 
@@ -338,50 +306,6 @@ $(document).on('click', '.shortParaChangeAttrButton ', (callingButton) =>
 });
 
 
-const handleShortParaPrefabSubmit = (callingButton) => {
-
-    console.log(callingButton);
-    
-    let placeHolderInputId = $(callingButton).attr("placeHolderId");
-    let maxCharId = $(callingButton).attr("shortParaCharLimId");
-    let shortParaTextAreaId = $(callingButton).attr("shortParaId");
-
-
-    let newPlaceHolder = $('#' + placeHolderInputId).val();
-    let newCharLim = $('#' + maxCharId).val();
-
-    
-
-    //Check if valid number (should already be caught since already set max and min and set type to 'number', but just to be sure...)
-    if($.isNumeric(newCharLim))
-    {
-        //Replace placeholder in textArea as well since alls well
-        $('#' + shortParaTextAreaId).attr("placeholder", newPlaceHolder);
-        $('#' + shortParaTextAreaId).attr("max", newCharLim);
-    }
-        
-    else
-    {
-        $(callingButton).hide();
-        $('#' + maxCharId).css({"border": "thin double red", "background-color": "rgba(250,170,170,0.65)", "border-radius": "4px"}).after("<span>Please provide a valid number</span>");
-        
-        //Because Jquery can't animate color by default(?) use timeout instead of importing another library
-        setTimeout(() =>{
-            $('#' + maxCharId).css({"border": "", "background-color": "", "border-radius": ""}).next().remove();
-            $(callingButton).show();
-        }, 2000);
-        
-    
-    }
-    
-    //publish Title
-    updateTitle(callingButton);
-    //Won't clear text fields, they are used to change, not add to the form field
-}
-
-
-
-
 
 
 $(document).on('click', '.shortAnsChangeAttrButton ', (callingButton) =>
@@ -389,64 +313,6 @@ $(document).on('click', '.shortAnsChangeAttrButton ', (callingButton) =>
     
     handleShortAnsPrefabSubmit($(callingButton.target));
 });
-
-
-
-//Similar to Short paragraph, but with preleading label for input and shorter input field
-const handleShortAnsPrefabSubmit = (callingButton) => {
-
-    console.log(callingButton);
-    
-    let placeHolderInputId = $(callingButton).attr("placeHolderId");
-    let maxCharId = $(callingButton).attr("shortAnsCharLimId");
-    let shortAnsLabelInputId = $(callingButton).attr("shortAnsLabelInputId");
-
-    let shortAnsTextAreaId = $(callingButton).attr("shortAnsId");
-    //let inputLabelId = $(callingButton).attr("shortAnsLabelId");
-
-
-    let newPlaceHolder = $('#' + placeHolderInputId).val();
-    let newCharLim = $('#' + maxCharId).val();
-    let newInputLabel = $('#' + shortAnsLabelInputId).val();
-
-    
-
-    //Check if valid number (should already be caught since already set max and min and set type to 'number', but just to be sure...)
-    if($.isNumeric(newCharLim))
-    {
-        //Replace placeholder in textArea as well since alls well
-        $('#' + shortAnsTextAreaId).attr("placeholder", newPlaceHolder);
-        $('#' + shortAnsTextAreaId).attr("max", newCharLim);
-
-        //change label infront of text field
-        //$('#' + inputLabelId).text(newInputLabel);
-    }
-        
-    else
-    {
-        $(callingButton).hide();
-        $('#' + maxCharId).css({"border": "thin double red", "background-color": "rgba(250,170,170,0.65)", "border-radius": "4px"}).after("<span>Please provide a valid number</span>");
-        
-        //Because Jquery can't animate color by default(?) use timeout instead of importing another library
-        setTimeout(() =>{
-            $('#' + maxCharId).css({"border": "", "background-color": "", "border-radius": ""}).next().remove();
-            $(callingButton).show();
-        }, 2000);
-        
-    
-    }
-
-    //publish Title
-    updateTitle(callingButton);
-    
-    //Won't clear text fields, they are used to change, not add to the form field
-}
-
-
-
-
-
-
 
 
 
@@ -466,32 +332,17 @@ $(document).on('click', '.checkAddOptionButton ', (callingButton) =>
 
 
 
+//use to handle when updating number of stars for star rating
+$(document).on('change', '.starCountInput', (event) => {
+    
+    //call updateStarCount, since this and on.input will need to be checked
+    updateStarCount(event, starImgPth, emptyStarImgPth);
+
+});
 
 
-const updateStarCount = (event) =>{
 
-    let chosenImage;
-    let newNumStars = $(event.target).val();
-    let thisStarId = $(event.target).siblings('.starRatingDiv').attr('idCounter');
 
-    let tempLabel = $('#starLabel_' + thisStarId).text() + '_' + thisStarId;
-
-    //Will remove old list of stars in div, and add new ones
-
-    $(event.target).siblings('.starRatingDiv').empty();
-
-    //loop through and add new starts
-
-    for(let i = 0; i < newNumStars; i++)
-            {
-                chosenImage = (i <= 3)? starImgPth : emptyStarImgPth;
-                //add an input of type 'radio', with relavant attributes. Make display:none so that only label shows, thus providing an image to click
-                $(event.target).siblings('.starRatingDiv')
-                .append('<input type="radio" id="starRating_'+ thisStarId+'_' + i + '" name="' + tempLabel + '" value="'+ i +'" style="visibility:hidden">')  
-                .append('<label for="starRating_'+ thisStarId+'_' + i + '"><img class="starButton" src="'+ chosenImage +'"  width="20" height="20"></img></label>'); 
-            }
-
-}
 
 
 
@@ -507,6 +358,10 @@ const updateStarCount = (event) =>{
 
 
 
+//TODO Tie updating title/questionHeader to updating object data
+
+
+//TODO ----------------------- VVVVVVVVVVVVVVVVVVVVVVVVVVV  redundant i think, think i removed all buttons tied to updating title
 
 //publishes the title when user submits changes
 const updateTitle = (callingButton)=> {
@@ -519,7 +374,7 @@ const updateTitle = (callingButton)=> {
 }
 
 
-
+//------------------------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  
 
 
 
@@ -542,6 +397,18 @@ $(document).on('input','.labelInput' , (event)=>{
         {
             $('label#' + updatingLabelId).next().children('input').attr('name', currentWord);
         }
+
+
+
+//_______-------- VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  -------------------- VVVVVVVVVVVVVV
+
+
+        //TODO update the data of coresponding object
+
+
+
+
+        //_______----MMMMMMMMMMMMMMMMMM  -------------------- MMMMMMMMMMMMMMMMMMMMMM
     });	
 
 
@@ -553,6 +420,18 @@ $(document).on('input','.questionHeaderField' , (event)=>{
     let currentWord = $(event.target).val();
     let updatingLabelId = $(event.target).attr("labelId");
     $('label#' + updatingLabelId).text(currentWord);
+
+
+//_______-------- VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  -------------------- VVVVVVVVVVVVVV
+
+
+        //TODO update the data of coresponding object
+
+
+
+
+        //_______----MMMMMMMMMMMMMMMMMM  -------------------- MMMMMMMMMMMMMMMMMMMMMM
+
 });	
 
 
@@ -581,28 +460,21 @@ $(document).on('click', '.starButton', (event) => {
         $(object).children('img').attr('src', emptyStarImgPth); 
     });
 
+    //_______-------- VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  -------------------- VVVVVVVVVVVVVV
+
+
+        //TODO update the data of coresponding object
+
+
+
+
+        //_______----MMMMMMMMMMMMMMMMMM  -------------------- MMMMMMMMMMMMMMMMMMMMMM
 
 });
 
 
 
-//use to handle when updating number of stars for star rating
-$(document).on('change', '.starCountInput', (event) => {
-    
-    //call updateStarCount, since this and on.input will need to be checked
-    updateStarCount(event);
 
-});
-
-
-
-
-    
-
-//TODO place keypress handle for other fields that don't need to be submitted
-//ie, for now focus on star rating and number of stars
-//later, things unhandled lie default text, char count, etc
-//anything really  that isn't submitting options
 
 
 $(document).ready(() => {
@@ -635,8 +507,8 @@ $(document).ready(() => {
         case "selectBox":
             
             formDivId = createSelectBoxPrefab(targetSelector, thisFormId, selectBoxIdCounter);
-            //let newSelect = new selectBoxCounter();
-            //formList.push(newSelect);
+            let newSelect = new SelectBox(targetSelector, thisFormPos, '', 'SelectBox'+selectBoxIdCounter);
+            formList.push(newSelect);
 
             //Increment number of SelectBox counter
             selectBoxIdCounter++;
@@ -655,6 +527,12 @@ $(document).ready(() => {
         case 'shortParagraph':
                 
             formDivId = createShortParagraphPrefab(targetSelector, thisFormId, shortParagraphIdCounter, SURVEY_MAX_CHAR_LIMIT);
+
+            //TODO, if decide to change mind and add a label for the paragraph, be sure to include with constructor
+            let newShortPara = new ShortParagraph(targetSelector, thisFormPos, '', SURVEY_MAX_CHAR_LIMIT, '');
+
+            formList.push(newShortPara);
+
             //Increment number of SelectBox counter
             shortParagraphIdCounter++;
             shortParagraphCounter++;
@@ -674,6 +552,10 @@ $(document).ready(() => {
             
             formDivId = createShortAnswerPrefab(targetSelector, thisFormId, shortAnswerIdCounter, SURVEY_MAX_CHAR_LIMIT);
 
+            let newShortAns = new ShortAnswer(targetSelector, thisFormPos, '', 'ShortAnswer'+shortAnswerIdCounter, SURVEY_MAX_CHAR_LIMIT, '');
+
+            formList.push(newShortAns);
+
             //Increment number of SelectBox counter
             shortAnswerIdCounter++;
             shortAnswerCounter++;
@@ -691,9 +573,6 @@ $(document).ready(() => {
         case 'checkBox':
             formDivId=  createCheckBoxPrefab(targetSelector, thisFormId, checkBoxIdCounter);
             let newCheckBox = new CheckBox(formDivId, thisFormPos, '', 'CheckBox'+checkBoxIdCounter);
-
-            console.log('new check ', newCheckBox);
-
 
             formList.push(newCheckBox);
 
@@ -714,12 +593,10 @@ $(document).ready(() => {
         case 'multipleChoice':
             
             formDivId =  createMultChoicePrefab(targetSelector, thisFormId, multipleChoiceIdCounter);
-            let newMultChoice = new MultipleChoice(formDivId, thisFormPos, '', 'Mult'+multipleChoiceIdCounter);
-            console.log('new Mult ',newMultChoice);
+            let newMultChoice = new MultipleChoice(formDivId, thisFormPos, '', 'MultipleChoice'+multipleChoiceIdCounter);
 
             formList.push(newMultChoice);
 
-            console.log(formList);
 
             multipleChoiceIdCounter++;
             multipleChoiceCounter++;
@@ -739,6 +616,8 @@ $(document).ready(() => {
 
             formDivId = createStarRatingPrefab(targetSelector, thisFormId, starIdCounter, starImgPth, emptyStarImgPth, STAR_RATING_MAX_STAR_LIMIT);
 
+            let newStarRating = new StarRating(targetSelector, thisFormPos, 5, 3, '', 'StarRating'+starIdCounter)
+            formList.push(newStarRating);
 
             //Increment number of SelectBox counter
             starIdCounter++;

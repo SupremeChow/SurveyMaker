@@ -119,7 +119,7 @@
                 anOption.selected = false;
                 return false;
             }  
-        })
+        })[0]
         .position;
         selectedOption = position;
 
@@ -155,7 +155,7 @@ class MultOption{
         this.position = position;
         this.label = label;
         this.value = value;
-        this.forFormId = forFormId; //might need, since it does help with relating to checkboxInput to lable (TODO double check, might only be for selections
+        this.forFormId = forFormId; //might need, (TODO double check, 
         this.selected = selected;
     }
 
@@ -252,7 +252,7 @@ const createMultChoicePrefab = (targetSelector, formCounterId,  multFormId) =>{
 
     //Add the label for multiple choice
     $(formDivId)
-    .append('<label  id="multLabel_' + multFormId + '" for="multipleChoice_' + multFormId + '">Label:</label>');
+    .append('<label  id="multLabel_' + multFormId + '" for="multipleChoice_' + multFormId + '">MultipleChoice'+multFormId+'</label>');
 
 
     //Add the Radio or multbox Section. Will use a div to insert the inputs
@@ -324,13 +324,13 @@ const handleMultPrefabSubmit = (callingButton) => {
     {
         //animate error on label field
 
-        //$(callingButton).hide();
+        $(callingButton).hide();
         $(callingButton).css({"border": "thin double red", "background-color": "rgba(250,170,170,0.65)", "border-radius": "4px"}).after("<span>Inputs are invalid/missing</span>");
         
         //Because Jquery can't animate color by default(?) use timeout instead of importing another library
         setTimeout(() =>{
             $(callingButton).css({"border": "", "background-color": "", "border-radius": ""}).next().remove();
-            //$(callingButton).show();
+            $(callingButton).show();
         }, 2000);
     }
 

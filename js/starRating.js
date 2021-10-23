@@ -1,3 +1,81 @@
+/**  
+ *  Class and methods for handling a StarRating
+ */
+
+//Treat similar to Multiple Choice, since it use radio buttons to handle star rating
+
+class StarRating 
+{
+    idVal;
+    position;
+    //parentFormId; //Hold off on this, may be nice to have for db, but no focus right now
+    numStars;
+    selectedOption;
+    question;
+    label;
+
+    constructor(idVal, position, numStars, selectedOption, question, label )
+    {
+        this.idVal = idVal;
+        this.position = position;
+        //this.parentFormId; //Hold off on this, may be nice to have for db, but no focus right now
+        this.numStars = numStars;
+        this.selectedOption = selectedOption;
+        this.question = question;
+        this.label = label;
+    }
+
+    //___________________________________________ Setters __________________________
+
+    set idVal(newId){};
+    set position(newPosition){};
+    //set parentFormId(newParent){}; //Hold off on this, may be nice to have for db, but no focus right now
+    set numStars(newNumStars){};
+    set selectedOption(newSelection){};
+    set question(newQuestion){};
+    set label(newLabel){};
+
+    //___________________________________________ Getters __________________________
+    
+    get idVal(){return this.idVal};
+    get position(){return this.position};
+    //get parentFormId(){return this.parentForimId;}; //Hold off on this, may be nice to have for db, but no focus right now
+    get numStars(){return this.numStars};
+    get selectedOption(){return this.selectedOption};
+    get question(){return this.question};
+    get label(){return this.label};
+
+
+
+
+    //___________________________________________ Other Methods ________________________
+
+    starClicked(starValue) 
+    {
+        //Input is the value of the coresponding radio button for that star
+        //TODO, method seems redundant given we already have set star, but we'll keep here incase other use for star rating be clicked
+
+        this.selectedOption = starValue;
+
+    }
+
+    toJSON()
+    {
+        return{ 
+            idVal : this.idVal,
+            position : this.position,
+            //parentFormId : this.parentFormId, 
+            numStars : this.numStars,
+            selectedOption : this.selectedOption,
+            question : this.question,
+            label : this.label
+        };
+    }
+}
+
+
+
+
 
 
 const createStarRatingPrefab = (targetSelector, formCounterId, starIdCounter, starImgPth, emptyStarImgPth, STAR_RATING_MAX_STAR_LIMIT) =>{
@@ -15,9 +93,9 @@ const createStarRatingPrefab = (targetSelector, formCounterId, starIdCounter, st
     $(formDivId)
     .append('<label class="questionHeader" id="starQuestionLabel_' + starIdCounter + '" for="starRating_' + starIdCounter + '"></label><br><br>');
 
-    //Add the label for multiple choice
+    //Add the label for starRating
     $(formDivId)
-    .append('<label  id="starLabel_' + starIdCounter + '" for="starRating_' + starIdCounter + '">Label:</label>');
+    .append('<label  id="starLabel_' + starIdCounter + '" for="starRating_' + starIdCounter + '">StarRating'+starIdCounter+'</label>');
 
 
 
@@ -59,4 +137,29 @@ const createStarRatingPrefab = (targetSelector, formCounterId, starIdCounter, st
     return formDivId;
 }
 
-export{createStarRatingPrefab};
+const updateStarCount = (event, starImgPth, emptyStarImgPth) =>{
+
+    let chosenImage;
+    let newNumStars = $(event.target).val();
+    let thisStarId = $(event.target).siblings('.starRatingDiv').attr('idCounter');
+
+    let tempLabel = $('#starLabel_' + thisStarId).text() + '_' + thisStarId;
+
+    //Will remove old list of stars in div, and add new ones
+
+    $(event.target).siblings('.starRatingDiv').empty();
+
+    //loop through and add new starts
+
+    for(let i = 0; i < newNumStars; i++)
+            {
+                chosenImage = (i <= 3)? starImgPth : emptyStarImgPth;
+                //add an input of type 'radio', with relavant attributes. Make display:none so that only label shows, thus providing an image to click
+                $(event.target).siblings('.starRatingDiv')
+                .append('<input type="radio" id="starRating_'+ thisStarId+'_' + i + '" name="' + tempLabel + '" value="'+ i +'" style="visibility:hidden">')  
+                .append('<label for="starRating_'+ thisStarId+'_' + i + '"><img class="starButton" src="'+ chosenImage +'"  width="20" height="20"></img></label>'); 
+            }
+
+}
+
+export{createStarRatingPrefab, updateStarCount, StarRating};

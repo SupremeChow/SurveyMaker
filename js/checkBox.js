@@ -5,8 +5,8 @@
 
 class CheckBox {
 
-    idVal = -1;
-    position = -1; 
+    idVal;
+    position; 
     //parentForm =;
     checkOptions = [];
     //numOptions;
@@ -47,7 +47,7 @@ class CheckBox {
     
     */
    
-    //check if possible to just assign array to array (or even worth coding, since this system doesn't actually implenet this)
+    //check if possible to just assign array (or even worth doing, since this system doesn't actually implenet this)
     set checkOptions(newCheckOptions)
     {
         //this.checkOptions = newCheckOptions;
@@ -114,7 +114,7 @@ class CheckBox {
     optionClicked(clickedButtonId)
     {
         // find the option coresponding to clicked button
-        let position = checkOptions.filter((anOption) => {anOption.id === clickedButtonId }).position;
+        let position = checkOptions.filter((anOption) => {anOption.id === clickedButtonId })[0].position;
         checked = checked ^ (1<<position);
 
         checkOptions[position].checked = !(checkOptions[position].checked);
@@ -313,13 +313,13 @@ const handleCheckPrefabSubmit = (callingButton) => {
     {
         //animate error on label field
 
-        //$(callingButton).hide();
+        $(callingButton).hide();
         $(callingButton).css({"border": "thin double red", "background-color": "rgba(250,170,170,0.65)", "border-radius": "4px"}).after("<span>Inputs are invalid/missing</span>");
         
         //Because Jquery can't animate color by default(?) use timeout instead of importing another library
         setTimeout(() =>{
             $(callingButton).css({"border": "", "background-color": "", "border-radius": ""}).next().remove();
-            //$(callingButton).show();
+            $(callingButton).show();
         }, 2000);
     }
 
