@@ -1,3 +1,239 @@
+/**
+ * Class and methods related to a MultiplChoice
+ * 
+ */
+
+ class MultipleChoice {
+
+    idVal;
+    position;
+    //parentFormId;
+    multOptions = [];
+    //numOptions;
+    selectedOption;
+    question = '';
+    label;
+
+    constructor(idVal, position, question, label )
+    {
+        this.idVal = idVal; //to identify 
+        this.position = position; //to determine it's order (TODO either handled in an external array, or use this variable)
+        //this.parentFormId = null; //TODO check if might need, good for db relation to determine which form it goes to
+        this.multOptions = []; //empty list of multOption objects
+        //this.numOptions = 0; //mult if needed for now, could use multOptions.length
+        this.selectedOption = 0; //NOTE use a number to define what's multed using bitwise operation. bitwise operation gives ~64 bit on/offs
+        this.question = question; //Main label for asking question
+        this.label = label; //Label used for putting infront of mults, acting as .name values as well
+
+
+    }
+
+    //____________________________________ Setters _______________________
+     set idVal(newId)
+     {
+    }
+    
+    set position(newPosition)
+    {
+    }
+    
+    /*
+    set parentFormId(newParentId)
+    {
+    }
+    
+    */
+   
+    //check if possible to just assign array to array (or even worth coding, since this system doesn't actually implenet this)
+    set multOptions(newMultOptions)
+    {
+    }
+    
+    //again, check if really worth, since functionally not possible (but nice for evetns such as check all above kind of things)
+    set selectedOption(newSelected) 
+    {
+    }
+   
+    set question(newQuestion)
+    {
+    }
+    
+    set label(newLabel)
+    {
+    }
+
+    //___________________________ Getters ________________________
+    get idVal()
+    {
+        return this.IdVal;
+    }
+    get position()
+    {
+        return this.position;
+    }
+    //hold of on this
+    // get parentFormId()
+    // {
+    //     return this.parentFormId;
+    // }
+
+    get multOptions()
+    {
+        return this.multOptions;
+    }
+
+    get selectedOption() 
+    {
+        return this.selectedOption;
+    }
+    get question()
+    {
+        return this.question;
+    }
+    get position()
+    {
+        return this.label;
+    }
+
+    //_________________________________ Other functions _______________________
+
+
+    addOption(newOption)
+    {
+        multOptions.push(newOption);
+    }
+    // TODO these are not implemented, later provide editing of options like deleting or moving around
+
+    optionClicked(clickedButtonId)
+    {
+        // find the option coresponding to clicked button
+        let position = multOptions.filter((anOption) => { 
+            if(anOption.id === clickedButtonId) 
+            {
+                anOption.selected = true;
+                return true;
+            }
+            
+            else
+            {
+                anOption.selected = false;
+                return false;
+            }  
+        })
+        .position;
+        selectedOption = position;
+
+    }
+
+    toJSON()
+    {
+        return {
+            idVal : this.idVal,
+            position : this.position, 
+            //parentFormId : this.parentFormId 
+            multOptions : this.multOptions,
+            //numOptions : this.numOptions 
+            selectedOption : this.selectedOption,
+            question : this.question,
+            label : this.label
+
+        };
+
+    }
+
+
+
+}
+
+//class used for determening options for MultipleChoice. MultipleChoice will
+//track the selected option via a number (as opposed the CheckBox using bitwise arithmatic to track all on and off)
+class MultOption{
+    
+    constructor(idVal, position, label, value, forFormId, selected)
+    {
+        this.idVal = idVal;
+        this.position = position;
+        this.label = label;
+        this.value = value;
+        this.forFormId = forFormId; //might need, since it does help with relating to checkboxInput to lable (TODO double check, might only be for selections
+        this.selected = selected;
+    }
+
+    //____________________________________ Setters _______________________
+    set idVal(newId)
+    {
+    }
+    
+    set position(newPosition)
+    {
+    }
+    
+    
+    set label(newLabel)
+    {
+    }
+    
+    set value(newValue) 
+    {
+    }
+    
+    set forFormId(newFormId)
+    {
+    }
+    
+    set selected(newSelectedState)
+    {
+    }
+
+   //___________________________ Getters ________________________
+    get idVal()
+    {
+        return this.IdVal;
+    }
+    
+    get position()
+    {
+        return this.position;
+    }
+    
+    
+    get label()
+    {
+        return this.label;
+    }
+    
+    get value() 
+    {
+        return this.value;
+    }
+    
+    get forFormId()
+    {
+        return this.forFormId;
+    }
+    
+    get selected()
+    {
+        return this.selected;
+    }
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const createMultChoicePrefab = (targetSelector, formCounterId,  multFormId) =>{
 
     let formDivId;
@@ -19,7 +255,7 @@ const createMultChoicePrefab = (targetSelector, formCounterId,  multFormId) =>{
     .append('<label  id="multLabel_' + multFormId + '" for="multipleChoice_' + multFormId + '">Label:</label>');
 
 
-    //Add the Radio or checkbox Section. Will use a div to insert the inputs
+    //Add the Radio or multbox Section. Will use a div to insert the inputs
     $(formDivId)
     .append('<div id="multipleChoice_' +multFormId + '"></div><br>');
 
@@ -42,11 +278,63 @@ const createMultChoicePrefab = (targetSelector, formCounterId,  multFormId) =>{
 
 
     //Add button that will add option to SelectBox. Holds SelectBox and relevant input id's to access them
-    //TODO change key names to be more general here and in calling method. For now leave as is to keep functionality, but later make generic for both mulchoice and checks
+    //TODO change key names to be more general here and in calling method. For now leave as is to keep functionality, but later make generic for both mulchoice and mults
     $(formDivId)
     .append('<input type="button" class="multAddOptionButton showOnEdit creatorComponents" id="multAddOptionButton_'+ multFormId +'"  multipleChoiceId="multipleChoice_' + multFormId + '" labelId="multLabel_'+ multFormId +'"  multNewOptionId="multPrefabInput_' + multFormId + '"multNewOptionValId="multPrefabInputVal_' + multFormId + '" formId="'+formCounterId+'" formType="radio" value="Add Option" >');
     
     return formDivId;
 }
 
-export {createMultChoicePrefab};
+
+
+const handleMultPrefabSubmit = (callingButton) => {
+
+
+
+    let formId = $(callingButton).attr("formId"); //We'll use this to id each new input so that they are unique but related to form
+
+    let formType = $(callingButton).attr("formType");
+    
+
+    let labelId =  $(callingButton).attr("labelId");
+    let currentGroupName = $('#'+labelId).text();
+
+    let radioDivId = $(callingButton).attr("multipleChoiceId");
+    
+
+    let optionNameId = $(callingButton).attr("multNewOptionId");
+    let optionName = $('#' + optionNameId).val();
+
+    let optionValueId = $(callingButton).attr("multNewOptionValId"); 
+    let optionValue = $('#' + optionValueId).val();
+
+
+
+
+    //Should mult if label is set
+    if(currentGroupName != '' && optionName != '' && optionValue != '')
+    {
+        
+        $('#' + radioDivId)
+        .append('<input type="'+formType+'" id="' + optionName +'_'+ formId + '" name="' + currentGroupName + ' " value="' + optionValue + '" >')
+        .append('<label for="' + optionName +'_'+ formId + '">'+ optionName +'</label>'); 
+
+    }
+    else
+    {
+        //animate error on label field
+
+        //$(callingButton).hide();
+        $(callingButton).css({"border": "thin double red", "background-color": "rgba(250,170,170,0.65)", "border-radius": "4px"}).after("<span>Inputs are invalid/missing</span>");
+        
+        //Because Jquery can't animate color by default(?) use timeout instead of importing another library
+        setTimeout(() =>{
+            $(callingButton).css({"border": "", "background-color": "", "border-radius": ""}).next().remove();
+            //$(callingButton).show();
+        }, 2000);
+    }
+
+    
+}
+
+export {createMultChoicePrefab, handleMultPrefabSubmit, MultipleChoice, MultOption};

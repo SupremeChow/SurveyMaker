@@ -1,25 +1,50 @@
-import {addPrefabControlDiv} from './formMenuControl.js';
+import {addPrefabControlDiv, handleSaveForm, handleEditForm, handleMoveUpForm, handleMoveDownForm, handleRemoveForm} from './formMenuControl.js';
 //import{} from './buttonEventHandlers.js'
 
-import{createStarRatingPrefab} from './starRating.js'
-import{createCheckBoxPrefab} from './checkBox.js'
-import{createMultChoicePrefab} from './multipleChoice.js'
+
+import{createCheckBoxPrefab, handleCheckPrefabSubmit, CheckBox, checkOption} from './checkBox.js'
+import{createMultChoicePrefab, handleMultPrefabSubmit, MultipleChoice, MultOption} from './multipleChoice.js'
 import{createSelectBoxPrefab} from './selectBox.js'
 import{createShortAnswerPrefab} from './shortAns.js'
 import{createShortParagraphPrefab} from './shortPara.js'
+import{createStarRatingPrefab} from './starRating.js'
 
 
 //_____________________________________________________________________________________________________________		
 //______________TODO------------------------------TODO--------------------TODO----------
 //_____________________________________________________________________________________________________________
 
+/** 
+ * Better labeling a for inputs, especialy paragraph. Don't rely on defaults to explain what goes in input
+Deleting items, moving (nice to have), duplication
+Remove added options ie to multiple choice or selector box
+Provide require functionality and checker (nice to have)
 
-//Better labeling a for inputs, especialy paragraph. Don't rely on defaults to explain what goes in input
-//Deleting items, moving (nice to have), duplication
-//Remove added options ie to multiple choice or selector box
-//Provide require functionality and checker
+Main: As classes are moved to seperate files, start implementing state of form tracking here.
+    *track total forms in a list (to preserve order), allow remove and move buttons to update this list
+    *provide a method that, on publish, will iterate through list and call toJSON() on objects
+    * place those json output into a file to be (FINALLY) send to php back server to process for saving
+    * Test resconstructing of page
+    * Setup db to handle submission of survey JSON to save for reconstructing and formating answers
+    * Setup and test allowing user to submit form
 
+    * Change default labels to relevant Type+id#
 
+    !!! setting the form type out of order (adding two empties, then setting the second to CHeck, first to para)
+    !!! makes them appear out of counting order, assign form order on template select
+    !!! the labels aren't too important, they are there as temp labels and to distinguish same types
+
+    !! Changed so formTypeSelector gets the formCountId, and increments those values, then gets added
+    !! to formList[] as placeHolders to preserve spot in list
+    !! Will need to 
+        1) implement setting relevant data to new chosen formType when placeholder is destroyed
+        2) Handle looping through formList[] affecting placeholder
+
+        currently, fixed move up/down, need to handle order with delete
+        Right now, primarily setting up classes for rest of form types, finish that, then move to delete
+        
+
+*/
 
 //_____________________________________________________________________________________________________________
 //___________________________ Constants and variable Declarations__________ __________________________________
@@ -73,12 +98,19 @@ let starIdCounter = 0; //For assigning id's to star rating & elements, will not 
 let starCounter = 0;	//For tracking number of star, can decrement on deletes
 
 
+
+//A list of forms, used to track what's added and order
+//stick the form objects (their individual classes here)
+let formList = [];
+
+
+
 //_____________________________________________________________________________________________________________
 //___________________________ Button Handlers for General Form Manipulation __________________________________
 //_____________________________________________________________________________________________________________
+//DO NOT MOVE TO FORMMENUCONTROLS! Need to alter state of formList from here
 
-
-//selectAddOptionButton
+//save Button (leave edit mode)
 $(document).on('click', '.saveButton', (callingButton) =>
 {
     
@@ -86,138 +118,160 @@ $(document).on('click', '.saveButton', (callingButton) =>
 });
 
 
-const handleSaveForm = (callingButton) => {
-
-    let formDivId = $(callingButton).attr("formDivId");
-    //let fieldQuestion = $(formDivId + " .questionHeaderField").val();
-
-    //$(formDivId + " label.questionHeader").text(fieldQuestion);
-
-    $(formDivId).children(".showOnEdit").hide();
-    $(formDivId).children(".hideOnEdit").show();
-
-    //$(formDivId + " input:last").show();
-    $(formDivId).next().children(".showOnEdit").hide();
-    $(formDivId).next().children(".hideOnEdit").show();
-}
 
 
-//selectAddOptionButton
+
+//edit Button (bring back editing controls)
 $(document).on('click', '.editButton', (callingButton) =>
 {
     
     handleEditForm($(callingButton.target));
 });
 
-const handleEditForm = (callingButton) => {
-
-    let formDivId = $(callingButton).attr("formDivId");
-
-    $(formDivId).children(".showOnEdit").show();
-    $(formDivId).children(".hideOnEdit").hide();
-
-    $(formDivId).next().children(".showOnEdit").show();
-    $(formDivId).next().children(".hideOnEdit").hide();
-}	
 
 
-//selectAddOptionButton
+
+//moveUp Button
 $(document).on('click', '.moveUpButton', (callingButton) =>
 {
+    let didMove = handleMoveUpForm($(callingButton.target));
+
+    if(didMove)
+    {
+        console.log('checking list BEFORE move up...:', formList);
+
+        //swap in main list
+        let targetPos;
+        let targetForm = formList.filter((aForm, index) => {
+
+            console.log('Checking against : ', aForm.idVal, index);
+            if(aForm.idVal === $(callingButton.target).attr('formDivId'))
+            {
+                targetPos = index;
+                return true;
+            }
+            return false;
+            
+        });
+
+
     
-    handleMoveUpForm($(callingButton.target));
+
+    
+        //formList[targetPos-1] 
+        let tempForm = formList.splice(targetPos, 1, formList[targetPos-1])[0];
+
+        console.log('the spliced removed', tempForm);
+
+        console.log(' formList should only be one, the previous',formList);
+        formList.splice(targetPos-1, 1, tempForm);
+
+
+
+
+
+
+        console.log('checking list change up...:');
+
+        formList.forEach((object, index) => {
+
+            console.log('object, index : ', object, index);
+        });
+    }
+    
 });
 
 
-const handleMoveUpForm = (callingButton) => {
-    let formId = $(callingButton).attr('formDivId');
-    let formControlId = $(formId).next('.prefabControlsDiv').attr('id');
-
-    let previousFormId = $(formId).prevAll('.formField:first').attr('id');
-
-    
 
 
-    //check if forms are there and if true, swap
 
-    if(previousFormId != '')
-    {
-        $(formId).insertBefore('#'+ previousFormId);
-        $('#' + formControlId).insertAfter(formId);
-    }
-}
-
-
-//selectAddOptionButton
+//moveDown Button
 $(document).on('click', '.moveDownButton', (callingButton) =>
 {
     
-    handleMoveDownForm($(callingButton.target));
+    let didMove = handleMoveDownForm($(callingButton.target));
+    if(didMove)
+    {
+        console.log('checking list BEFORE move down...:', formList);
+        //swap in main list
+        let targetPos;
+        let targetForm = formList.filter((aForm, index) => {
+
+            console.log('Checking against : ', aForm.idVal, index);
+            if(aForm.idVal === $(callingButton.target).attr('formDivId'))
+            {
+                targetPos = index;
+                return true;
+            }
+            return false;
+            
+        });
+
+        //use Object.assign(target, source) to create copy
+        let tempForm = formList.splice(targetPos,1,formList[targetPos+1])[0];
+
+        
+        console.log(' formList should only be two', formList);
+
+
+
+        formList.splice(targetPos+1, 1, tempForm);
+
+
+
+
+
+        console.log('checking list change down...:', formList);
+
+        console.log('checking list change up...:');
+
+        formList.forEach((object, index) => {
+
+            console.log('object, index : ', object, index);
+        });
+    }
 });
 
-const handleMoveDownForm = (callingButton) => {
-    let formId = $(callingButton).attr('formDivId');
-    
-
-    let nextFormId = $(formId).nextAll('.formField:first').attr('id');
-    let otherFormControlId = $('#' + nextFormId).next('.prefabControlsDiv').attr('id');
-
-
-    //check if forms are there and if true, swap
-
-    if(nextFormId != '')
-    {
-        $('#'+ nextFormId).insertBefore(formId);
-        $('#' + otherFormControlId).insertAfter('#'+ nextFormId);
-    }
-
-}
 
 
 
-//selectAddOptionButton
+
+//removeButton
 $(document).on('click', '.removeButton', (callingButton) =>
 {
     
-    handleRemoveForm($(callingButton.target));
-});
-
-const handleRemoveForm = (callingButton) => {
-    let formId = $(callingButton).attr('formDivId');
-    let formControlId = $(formId).next('.prefabControlsDiv').attr('id');
-
     //Decrement relevant form counts
-    if($(formId).hasClass('selectPrefabDiv'))
+    if($(callingButton.target).hasClass('selectPrefabDiv'))
     {
         selectBoxCounter--;
     }
-    else if($(formId).hasClass('shortParaPrefabDiv'))
+    else if($(callingButton.target).hasClass('shortParaPrefabDiv'))
     {
         shortParagraphCounter--;
     }
-    else if($(formId).hasClass('shortAnsPrefabDiv'))
+    else if($(callingButton.target).hasClass('shortAnsPrefabDiv'))
     {
         shortAnswerCounter--;
     }
-    else if($(formId).hasClass('checkPrefabDiv'))
+    else if($(callingButton.target).hasClass('checkPrefabDiv'))
     {
         checkBoxCounter--;
     }
-    else if($(formId).hasClass('multPrefabDiv'))
+    else if($(callingButton.target).hasClass('multPrefabDiv'))
     {
         multipleChoiceCounter--;
     }
-    else ($(formId).hasClass('starPrefabDiv'))
+    else ($(callingButton.target).hasClass('starPrefabDiv'))
     {
         starCounter--;
     }
 
     formCounter--;
+    
+    handleRemoveForm($(callingButton.target));
+});
 
 
-    $(formId).remove();
-    $('#' + formControlId).remove();
-}
 
 //_____________________________________________________________________________________________________________
 //____________________________________ Handlers for Editing Form Properties ____________________________
@@ -233,8 +287,7 @@ $(document).on('click', '.selectAddOptionButton', (callingButton) =>
 });
 
 const handleSelectPrefabSubmit = (callingButton) => {
-    console.log(callingButton);
-    console.log($(callingButton).attr("selectnewoptionid"));
+    
     let inputOptionId = $(callingButton).attr("selectnewoptionid");
     let inputOptionValId = $(callingButton).attr("selectnewoptionvalid");
     let selectBoxId = $(callingButton).attr("selectboxid");
@@ -247,7 +300,7 @@ const handleSelectPrefabSubmit = (callingButton) => {
     let newSelectLabel = $('#' + selectLabelInputId).val();
     let newOption = $('#' + inputOptionId).val();
     let newOptionVal = $('#' + inputOptionValId).val();
-    console.log(newOption);
+
     if(newOption !== "")
     {
         if($('#' + selectBoxId + " option").first().val() == "ReplaceDefault")
@@ -258,7 +311,6 @@ const handleSelectPrefabSubmit = (callingButton) => {
         }
         else
         {
-            console.log("appending to... :#", selectBoxId);
             $('#' + selectBoxId).append('<option value = ' + newOptionVal + ' >'+ newOption + '</option>');
             $('#' + inputOptionId).val("");
             $('#' + inputOptionValId).val("");
@@ -266,10 +318,12 @@ const handleSelectPrefabSubmit = (callingButton) => {
         
     }
 
+    /*
     //publish Title
     updateTitle(callingButton);
     //change label infront of selectBox
     $('#' + selectLabelId).text(newSelectLabel);
+    */
         
 }
 
@@ -397,63 +451,21 @@ const handleShortAnsPrefabSubmit = (callingButton) => {
 
 
 
+//both multPrefabSubmit and CheckPrefabSubmit are the same method, but we'll seperate them into coresponding js files to make them independent of eachother
 
-$(document).on('click', '.multAddOptionButton, .checkAddOptionButton ', (callingButton) =>
+$(document).on('click', '.multAddOptionButton', (callingButton) =>
 {
+    
     handleMultPrefabSubmit($(callingButton.target));
 });
-
-const handleMultPrefabSubmit = (callingButton) => {
-
-
-
-    let formId = $(callingButton).attr("formId"); //We'll use this to id each new input so that they are unique but related to form
-    console.log('Multiple choice: ');
-
-    let formType = $(callingButton).attr("formType");
+$(document).on('click', '.checkAddOptionButton ', (callingButton) =>
+{
     
-
-    let labelId =  $(callingButton).attr("labelId");
-    let currentGroupName = $('#'+labelId).text();
-
-    let radioDivId = $(callingButton).attr("multipleChoiceId");
-    
-
-    let optionNameId = $(callingButton).attr("multNewOptionId");
-    let optionName = $('#' + optionNameId).val();
-
-    let optionValueId = $(callingButton).attr("multNewOptionValId"); 
-    let optionValue = $('#' + optionValueId).val();
+    handleCheckPrefabSubmit($(callingButton.target));
+});
 
 
 
-
-    //Should check if label is set
-    if(currentGroupName != '' && optionName != '' && optionValue != '')
-    {
-        
-        $('#' + radioDivId)
-        .append('<input type="'+formType+'" id="' + optionName +'_'+ formId + '" name="' + currentGroupName + ' " value="' + optionValue + '" >')
-        .append('<label for="' + optionName +'_'+ formId + '">'+ optionName +'</label>'); 
-
-    }
-    else
-    {
-        //animate error on label field
-
-        //$(callingButton).hide();
-        $(callingButton).css({"border": "thin double red", "background-color": "rgba(250,170,170,0.65)", "border-radius": "4px"}).after("<span>Inputs are invalid/missing</span>");
-        
-        //Because Jquery can't animate color by default(?) use timeout instead of importing another library
-        setTimeout(() =>{
-            $(callingButton).css({"border": "", "background-color": "", "border-radius": ""}).next().remove();
-            //$(callingButton).show();
-        }, 2000);
-    }
-
-    console.log(callingButton);
-    
-}
 
 
 const updateStarCount = (event) =>{
@@ -603,8 +615,14 @@ $(document).ready(() => {
     //When document changes because the user choose which type of form field to make
     $(document).on('change', '.formSelectorMenu', (theElement) => {
 
+    
+
     //..leave these for now, it works and doesn't break what we have
     let targetSelector = theElement.target;
+
+    //grab the formId and position before being destroyed
+    let thisFormId = $(targetSelector).attr('formId');
+    let thisFormPos = $(targetSelector).attr('formPos');
 
     let formSelected = $(targetSelector).val();
 
@@ -616,7 +634,9 @@ $(document).ready(() => {
     {
         case "selectBox":
             
-            formDivId = createSelectBoxPrefab(targetSelector, formCounterId, selectBoxIdCounter);
+            formDivId = createSelectBoxPrefab(targetSelector, thisFormId, selectBoxIdCounter);
+            //let newSelect = new selectBoxCounter();
+            //formList.push(newSelect);
 
             //Increment number of SelectBox counter
             selectBoxIdCounter++;
@@ -625,25 +645,25 @@ $(document).ready(() => {
 
 
             //Create div for save/edit/ 
-            addPrefabControlDiv(formDivId, formCounterId);
+            addPrefabControlDiv(formDivId, thisFormId);
 
-            formCounterId++;
-            formCounter++;
+          //  formCounterId++;
+          //  formCounter++;
             
             break;
 
         case 'shortParagraph':
                 
-            formDivId = createShortParagraphPrefab(targetSelector, formCounterId, shortParagraphIdCounter, SURVEY_MAX_CHAR_LIMIT);
+            formDivId = createShortParagraphPrefab(targetSelector, thisFormId, shortParagraphIdCounter, SURVEY_MAX_CHAR_LIMIT);
             //Increment number of SelectBox counter
             shortParagraphIdCounter++;
             shortParagraphCounter++;
 
             //Create div for save/edit/ 
-            addPrefabControlDiv(formDivId, formCounterId);
+            addPrefabControlDiv(formDivId, thisFormId);
 
-            formCounterId++;
-            formCounter++;
+          //  formCounterId++;
+          //  formCounter++;
 
             break;
 
@@ -652,49 +672,63 @@ $(document).ready(() => {
             //Same as short paragraph, except smaller text field and a label in front
         case 'shortAnswer':
             
-            formDivId = createShortAnswerPrefab(targetSelector, formCounterId, shortAnswerIdCounter, SURVEY_MAX_CHAR_LIMIT);
+            formDivId = createShortAnswerPrefab(targetSelector, thisFormId, shortAnswerIdCounter, SURVEY_MAX_CHAR_LIMIT);
 
             //Increment number of SelectBox counter
             shortAnswerIdCounter++;
             shortAnswerCounter++;
 
             //Create div for save/edit/ 
-            addPrefabControlDiv(formDivId, formCounterId);
+            addPrefabControlDiv(formDivId, thisFormId);
 
-            formCounterId++;
-            formCounter++;
+          //  formCounterId++;
+          //  formCounter++;
 
             break;
 
 
 
         case 'checkBox':
-            formDivId=  createCheckBoxPrefab(targetSelector, formCounterId, checkBoxIdCounter);
+            formDivId=  createCheckBoxPrefab(targetSelector, thisFormId, checkBoxIdCounter);
+            let newCheckBox = new CheckBox(formDivId, thisFormPos, '', 'CheckBox'+checkBoxIdCounter);
+
+            console.log('new check ', newCheckBox);
+
+
+            formList.push(newCheckBox);
+
+            console.log(formList);
 
             checkBoxIdCounter++;
             checkBoxCounter++;
 
             //Create div for save/edit/ 
-            addPrefabControlDiv(formDivId, formCounterId);
+            addPrefabControlDiv(formDivId, thisFormId);
 
-            formCounterId++;
-            formCounter++;
+          //  formCounterId++;
+          //  formCounter++;
 
             break;
 
 
         case 'multipleChoice':
             
-            formDivId =  createMultChoicePrefab(targetSelector, formCounterId, multipleChoiceIdCounter);
+            formDivId =  createMultChoicePrefab(targetSelector, thisFormId, multipleChoiceIdCounter);
+            let newMultChoice = new MultipleChoice(formDivId, thisFormPos, '', 'Mult'+multipleChoiceIdCounter);
+            console.log('new Mult ',newMultChoice);
+
+            formList.push(newMultChoice);
+
+            console.log(formList);
 
             multipleChoiceIdCounter++;
             multipleChoiceCounter++;
 
             //Create div for save/edit/ 
-            addPrefabControlDiv(formDivId, formCounterId);
+            addPrefabControlDiv(formDivId, thisFormId);
 
-            formCounterId++;
-            formCounter++;
+           // formCounterId++;
+           // formCounter++;
 
             break;
             
@@ -703,7 +737,7 @@ $(document).ready(() => {
         case 'starRating':
 
 
-            formDivId = createStarRatingPrefab(targetSelector, formCounterId, starIdCounter, starImgPth, emptyStarImgPth, STAR_RATING_MAX_STAR_LIMIT);
+            formDivId = createStarRatingPrefab(targetSelector, thisFormId, starIdCounter, starImgPth, emptyStarImgPth, STAR_RATING_MAX_STAR_LIMIT);
 
 
             //Increment number of SelectBox counter
@@ -712,10 +746,10 @@ $(document).ready(() => {
 
             //Create div for save/edit/ 
 
-            addPrefabControlDiv(formDivId, formCounterId);
+            addPrefabControlDiv(formDivId, thisFormId);
 
-            formCounterId++;
-            formCounter++;
+           // formCounterId++;
+           // formCounter++;
 
             break;
 
@@ -747,7 +781,15 @@ $(document).ready(() => {
     // Add a new select box for deciding which prefab survey to create
     $('#newFormElementButton').click( (event) => {
         event.preventDefault();
-        $("#newFormElementButton").before(formSelector);
+        $('#newFormElementButton').before(formSelector);
+
+        //Need to set a formId attribute, so that order of new forms added correctly
+        //In a way, these are placeHolders in formList[]
+        //Will need to filter/map the list when converting to JSON/Publishing to remove all placeholders and update order values
+        $('#newFormElementButton').prevAll('.formSelectorMenu:first').attr('formId', formCounterId).attr('id', 'PlaceHolder_' + formCounterId).attr('formPos', formCounter);
+
+        formCounterId++;
+        formCounter++;
 
         // //refresh footer
         // $('.footer').css('top', '100%');
