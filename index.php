@@ -17,11 +17,12 @@
 
 		<!-- Importing own scripts here -->
 		<script type="module" src="js/formEditor.js"></script>
-
+		
+		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
 
-		<div>
+		<div id="mainContent">
 			<form id="formStart" method="post" action="saveSurvey.php">
 				<button class="creatorComponents" id="newFormElementButton" >Add</button>
 			</form>

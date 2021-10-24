@@ -16,33 +16,25 @@ import{createStarRatingPrefab, updateStarCount, StarRating} from './starRating.j
 
 /** 
  * Better labeling a for inputs, especialy paragraph. Don't rely on defaults to explain what goes in input
-Deleting items, moving (nice to have), duplication
-Remove added options ie to multiple choice or selector box (important, but for now focus on getting whole system connected)
+ * 
+    duplication(nice to have, but really not needed now)
+
+!!!!! System cannot remove options for select styles, may want to implent as high priority nice/borderline necessary feature
+    
 Provide require functionality and checker (nice to have)
 
 Main: As classes are moved to seperate files, start implementing state of form tracking here.
-    *track total forms in a list (to preserve order), allow remove and move buttons to update this list
-    *provide a method that, on publish, will iterate through list and call toJSON() on objects
-    * place those json output into a file to be (FINALLY) send to php back server to process for saving
-    * Test resconstructing of page
+   
     * Setup db to handle submission of survey JSON to save for reconstructing and formating answers
     * Setup and test allowing user to submit form
 
-    * Change default labels to relevant Type+id# (nice to have)
 
-    !!! setting the form type out of order (adding two empties, then setting the second to CHeck, first to para)
-    !!! makes them appear out of counting order, assign form order on template select
+
+
+
+    * Change default labels to relevant Type+id# (nice to have). Also standarize some of the texts
     !!! the labels aren't too important, they are there as temp labels and to distinguish same types
 
-    
-
-
-
-
-
-        10/23 Early morning: Main fix now: 
-            * Tie Publish button to creating JSON of state, and test pushing to php
-            * everything else
             
 
         
@@ -686,9 +678,6 @@ $(document).ready(() => {
 
 
 
-
-
-
     //When document changes because the user choose which type of form field to make
     $(document).on('change', '.formSelectorMenu', (theElement) => {
 
@@ -937,14 +926,73 @@ $(document).ready(() => {
 
         console.log(finalJSON);
 
-        const finalJSONString = JSON.stringify(finalJSON);
 
+        
+
+        const finalJSONString = JSON.stringify(finalJSON);
+/* Hold off on this, instead maybe use POST to go to page
         //https://www.youtube.com/watch?v=mNrJDGfQGz0 Tell me what to do, oh wise video....
         const xhr = new XMLHttpRequest();
         xhr.open('POST','saveSurvey.php');
         xhr.setRequestHeader('Content-type', 'application/json'); //Note, if ambitious, figure out sending credentials and tokens from author
         xhr.send(finalJSONString); //It is done....
+        */
 
+        //VVVVVVVV  THIS WORKS, keep for now, edit with quick animation
+
+        $.ajax({
+            type: 'POST',
+            url: 'saveSurvey.php',
+            data: finalJSONString, // serializes form elements
+            success: function(response) {
+
+                let bodyHold = $('body').html();
+                console.log(response);
+
+                $('#mainContent').replaceWith('<div id="mainContent"><h1>Submitting, Generating Preview</h1></div>');
+                setTimeout(() =>{
+
+                    //Instead of opening a new doc, just update this one with preview elements, 
+                    // re-writes the entire document
+                    $('#mainContent').replaceWith(response);
+                    
+                }, 1000);
+
+                
+            }
+          });
+
+          /*
+        $.post('saveSurvey.php', finalJSONString , function(responseText) {
+            $('html').load(responseText);
+            
+        });
+        */
+        
+        /*
+        const xhr = new XMLHttpRequest();
+
+        //Try this to load
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr=== 200) {
+              //load the response page
+              $('window').load(xhr.response);
+            }
+            else
+            {
+                //on all other states
+                $('body').replaceWith('<div><h1>Submitting, Generating Preview</h1></div>');
+            }
+          }
+
+
+        xhr.open('POST','saveSurvey.php');
+        xhr.setRequestHeader('Content-type', 'application/json'); //Note, if ambitious, figure out sending credentials and tokens from author
+        xhr.send(finalJSONString); //It is done....
+
+        */
+
+        
 
         
         //This button will 'Submit the survey', which we won't do when editing, so is removed

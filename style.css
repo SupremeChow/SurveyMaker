@@ -1,0 +1,27 @@
+.formField {
+    border: thin double black; 
+    background-color: rgba(0,100,150,0.15); 
+    margin : 3px;
+    padding: 16px;
+}
+.contentlabel{
+    font-weight : bold;
+    font-size : 16px;
+}
+
+.questionHeader{
+    font-size : 30px;
+    text-decoration : underline;
+
+}
+.previewHeader{
+    background-color: rgba(199, 209, 57, 0.349); 
+    margin : 3px;
+    padding : 5px;
+    text-align: center;
+}
+.previewButton{
+    background-color: rgba(47, 47, 43, 0.267); 
+    color: rgba(148, 133, 133, 0.719);
+  
+}
