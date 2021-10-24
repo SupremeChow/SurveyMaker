@@ -6,56 +6,56 @@
 
  class ShortParagraph 
  {
-     idVal;
-     position;
-     question;
-     //label; //Didn't use label before, may not need, but keep here if prudent to add one
-     characterLim;
-     placeHolderText;
+    idVal;
+    position;
+    question;
+    //label; //Didn't use label before, may not need, but keep here if prudent to add one
+    characterLim;
+    placeHolderText;
+
+    constructor(idVal, position, question, characterLim, placeHolderText )
+    {
+        this.idVal = idVal;
+        this.position = position;
+        this.question = question;
+        //this.label = label;
+        this.characterLim = characterLim;
+        this.placeHolderText = placeHolderText;
+    }
+
+    //____________________________________________ setters _________________________________
  
-     constructor(idVal, position, question, characterLim, placeHolderText )
-     {
-         this.idVal = idVal;
-         this.position = position;
-         this.question = question;
-         //this.label = label;
-         this.characterLim = characterLim;
-         this.placeHolderText = placeHolderText;
-     }
- 
-     //____________________________________________ setters _________________________________
- 
-     set idVal(newIdVal){};
-     set position(newPosition){};
-     set question(newQuestion){};
-     //set label(newLabel){};
-     set characterLim(newCharLim){};
-     set placeHolderText(newPlaceHolder){};
+    set idVal(newIdVal){this._idVal = newIdVal;}
+    set position(newPosition){this._position = newPosition;}
+    set question(newQuestion){this._question = newQuestion;}
+    //set label(newLabel){this._label = newLabel;}
+    set characterLim(newCharLim){this._characterLim = newCharLim;}
+    set placeHolderText(newPlaceHolder){this._placeHolderText = newPlaceHolder;}
  
  
-     //____________________________________________ getters _________________________________
- 
-     get idVal(){return this.idVal};
-     get position(){return this.position};
-     get question(){return this.question};
-     //get label(){return this.label};
-     get characterLim(){return this.characterLim};
-     get placeHolderText(){return this.placeHolderText};
- 
-     //__________________________________________ Other Methods and functions ________________
- 
-     toJSON()
-     {
-         return {
-             idVal : this.idVal,
-             position : this.position,
-             question : this.question,
-             //label : this.label,
-             characterLim : this.characterLim,
-             placeHolderText : this.placeHolderText
-         };
- 
-     }
+    //____________________________________________ getters _________________________________
+
+    get idVal(){return this._idVal}
+    get position(){return this._position}
+    get question(){return this._question}
+    //get label(){return this._label}
+    get characterLim(){return this._characterLim}
+    get placeHolderText(){return this._placeHolderText}
+
+    //__________________________________________ Other Methods and functions ________________
+
+    toJSON()
+    {
+        return {
+            idVal : this.idVal,
+            position : this.position,
+            question : this.question,
+            //label : this._label,
+            characterLim : this.characterLim,
+            placeHolderText : this.placeHolderText
+        };
+
+    }
  }
  
 
@@ -68,38 +68,38 @@ const createShortParagraphPrefab = (targetSelector, formCounterId, shortParagrap
 
     //Insert Div for the shortParagraph Section
     $(targetSelector).replaceWith('<div formId = form_"'+ formCounterId +'" class="shortParaPrefabDiv formField" id="shortParaPrefabDiv_' + shortParagraphIdCounter + '"></div>');
-    formDivId = '#shortParaPrefabDiv_' + shortParagraphIdCounter;
+    formDivId = 'shortParaPrefabDiv_' + shortParagraphIdCounter;
 
 
 
     //Add Text input to set question
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input type="text" class="showOnEdit questionHeaderField creatorComponents" id="shortParaQuestionField_' + shortParagraphIdCounter + '" labelId="shortParaQuestionLabel_' + shortParagraphIdCounter + '" placeholder="Place question Here"><br>');
 
 
     //Add  the question 
-    $(formDivId)
+    $('#'+formDivId)
     .append('<label class="questionHeader" id="shortParaQuestionLabel_' + shortParagraphIdCounter + '" for="shortParaTextArea_' + shortParagraphIdCounter + '"></label><br><br>');
     
 
 
     //Add the TextField (Does nothing, there for viewing purposes and showing Author defaults if any) (while size is set here, its assume that text area can be resizeable from user)
-    $(formDivId)
+    $('#'+formDivId)
     .append('<textarea id="shortParaTextArea_' + shortParagraphIdCounter + '" name="shortPara_' + shortParagraphIdCounter + '" placeholder="Placeholder Text" rows="5" cols="64" maxlength="'+ SURVEY_MAX_CHAR_LIMIT +'"></textarea><br>');
 
 
 
 
     //Add text input for changing placeholder textbox message
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input type="text" class="showOnEdit creatorComponents" id="shortParaDefaultMes_'+ shortParagraphIdCounter +'" placeholder="Change placeholder message">');
 
     //Add text input for character limit
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input type="number" class="showOnEdit creatorComponents" id="shortParaCharLimit_'+ shortParagraphIdCounter +'" placeholder="Enter character Limit (max '+ SURVEY_MAX_CHAR_LIMIT +')" max = "'+ SURVEY_MAX_CHAR_LIMIT +'" min = "0">');
 
     //Add button that will add option to SelectBox. Holds SelectBox and relevant input id's to access them
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input type="button" class="shortParaChangeAttrButton showOnEdit creatorComponents" id="shortParawChangeAttrButton_'+ shortParagraphIdCounter+'" shortParaId="shortParaTextArea_' + shortParagraphIdCounter + '" placeHolderId="shortParaDefaultMes_' + shortParagraphIdCounter + '" shortParaCharLimId="shortParaCharLimit_'+ shortParagraphIdCounter +'" value="Apply Options">');
 
     return formDivId;
@@ -125,6 +125,8 @@ const handleShortParaPrefabSubmit = (callingButton) => {
         //Replace placeholder in textArea as well since alls well
         $('#' + shortParaTextAreaId).attr("placeholder", newPlaceHolder);
         $('#' + shortParaTextAreaId).attr("max", newCharLim);
+
+        return true;
     }
         
     else
@@ -138,7 +140,7 @@ const handleShortParaPrefabSubmit = (callingButton) => {
             $(callingButton).show();
         }, 2000);
         
-    
+        return false;
     }
     
     //publish Title

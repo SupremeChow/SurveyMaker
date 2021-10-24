@@ -31,12 +31,12 @@
     //____________________________________ Setters _______________________
     set idVal(newId)
     {
-        //this.IdVal = newId;
+        this._idVal = newId;
     }
     
     set position(newPosition)
     {
-        //this.position = newPosition;
+        this._position = newPosition;
     }
     
     /*
@@ -50,33 +50,33 @@
     //check if possible to just assign array (or even worth doing, since this system doesn't actually implenet this)
     set selectOptions(newSelectOptions)
     {
-        //this.checkOptions = newCheckOptions;
+        this._selectOptions = newSelectOptions;
     }
     
     //again, check if really worth, since functionally not possible (but nice for evetns such as check all above kind of things)
-    set selectedOption(newChecked) 
+    set selectedOption(newSelected) 
     {
-        //this.checked = newChecked;
+        this._selectedOption = newSelected;
     }
    
     set question(newQuestion)
     {
-        //this.question = newQuestion;
+        this._question = newQuestion;
     }
     
     set label(newLabel)
     {
-        //this.label = newLabel;
+        this._label = newLabel;
     }
 
     //___________________________ Getters ________________________
     get idVal()
     {
-        return this.IdVal;
+        return this._idVal;
     }
     get position()
     {
-        return this.position;
+        return this._position;
     }
     //hold of on this
     // get parentFormId()
@@ -86,20 +86,20 @@
 
     get selectOptions()
     {
-        return this.selectOptions;
+        return this._selectOptions;
     }
 
     get checked() 
     {
-        return this.checked;
+        return this._checked;
     }
     get question()
     {
-        return this.question;
+        return this._question;
     }
     get position()
     {
-        return this.label;
+        return this._label;
     }
 
     //_________________________________ Other functions _______________________
@@ -109,7 +109,7 @@
     {
         selectOptions.push(newOption);
     }
-    // TODO these are not implemented,  but later provide editing of options like deleting or moving around
+    // TODO not implemented,  but later provide editing of options like deleting or moving around
 
     optionClicked(clickedButtonId)
     {
@@ -136,11 +136,11 @@
             idVal : this.idVal,
             position : this.position, 
             //parentFormId : this.parentFormId 
-            checkOptions : this.checkOptions,
+            selectOptions :  this.selectOptions, 
             //numOptions : this.numOptions 
-            selectedOption : this.checked,
-            question : this.question,
-            label : this.label
+            selectedOption : (this.selectedOption===undefined) ? 0 :this.selectedOption,
+            question : this.question===undefined ? "" : this.question,
+            label : this.label===undefined ? "" : this.label
 
         };
 
@@ -154,9 +154,13 @@
 //track the selected option via a number (as opposed the CheckBox using bitwise arithmatic to track all on and off)
 class SelectOption{
     
-    constructor(idVal, position, label, value, forFormId, selected)
+    position;
+    selected = false;
+    label;
+    value;
+    constructor(position, label, value, selected) //forFormId, idVal,
     {
-        this.idVal = idVal;
+        //this.idVal = idVal;// Don't think need, only for matching labels for radio and check box
         this.position = position;
         this.label = label;
         this.value = value;
@@ -165,21 +169,26 @@ class SelectOption{
     }
 
     //____________________________________ Setters _______________________
-    set idVal(newId)
-    {
-    }
+    
+    // set idVal(newId)
+    // {
+    //     this._idVal = newId;
+    // }
     
     set position(newPosition)
     {
+        this._position = newPosition;
     }
     
     
     set label(newLabel)
     {
+        this._label = newLabel;
     }
     
     set value(newValue) 
     {
+        this._value = newValue;
     }
     
     // set forFormId(newFormId)
@@ -188,28 +197,29 @@ class SelectOption{
     
     set selected(newSelectedState)
     {
+        this._selected = newSelectedState;
     }
 
    //___________________________ Getters ________________________
-    get idVal()
-    {
-        return this.IdVal;
-    }
+    // get idVal()
+    // {
+    //     return this._idVal;
+    // }
     
     get position()
     {
-        return this.position;
+        return this._position;
     }
     
     
     get label()
     {
-        return this.label;
+        return this._label;
     }
     
     get value() 
     {
-        return this.value;
+        return this._value;
     }
     
     // get forFormId()
@@ -219,9 +229,23 @@ class SelectOption{
     
     get selected()
     {
-        return this.selected;
+        return this._selected;
     }
 
+    //_____________ toJSON() _______________
+
+    toJSON()
+    {
+        return {
+            //idVal : this._idVal,
+            position : this.position, 
+            label : this.label,
+            value : this.value,
+            //forFormId : this.forFormId 
+            isChecked : this.checked
+
+        };
+    }
 
 
 }
@@ -234,41 +258,41 @@ const createSelectBoxPrefab = (targetSelector, formCounterId, selectBoxIdCounter
     let formDivId;
     //Insert Div for the SelectBox Section
     $(targetSelector).replaceWith('<div formId= "form_'+ formCounterId +'" class="selectPrefabDiv formField" id="selectPrefabDiv_' + selectBoxIdCounter + '"></div>');
-    formDivId = '#selectPrefabDiv_' + selectBoxIdCounter;
+    formDivId = 'selectPrefabDiv_' + selectBoxIdCounter;
 
     //Add Text input to set question
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input class="showOnEdit questionHeaderField creatorComponents" type="text" id="selectQuestionField_' + selectBoxIdCounter + '" labelId="selectQuestionLabel_' + selectBoxIdCounter + '" placeholder="Place question Here"><br>');
 
 
     //Add  the question
-    $(formDivId)
+    $('#'+formDivId)
     .append('<label class="questionHeader" id="selectQuestionLabel_' + selectBoxIdCounter + '" for="selectBox_' + selectBoxIdCounter + '"></label><br><br>');
 
     //Add the label infront of the selectBox
-    $(formDivId)
+    $('#'+formDivId)
     .append('<label id="selectBoxLabel_' + selectBoxIdCounter + '" for="selectBox_' + selectBoxIdCounter + '">SelectBox'+selectBoxIdCounter+'</label>');
 
     //Add the SelectBox
-    $(formDivId)
+    $('#'+formDivId)
     .append('<select id="selectBox_' + selectBoxIdCounter + '"><option value="ReplaceDefault" >Options go here</option></select><br>');
 
 
 
     //Add text input for changing label infront of selectBox
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input class="showOnEdit creatorComponents labelInput" type="text" id="selectLabelInput_'+ selectBoxIdCounter +'" labelId="selectBoxLabel_' + selectBoxIdCounter + '" placeholder="Label:">');
 
     //Add text input for adding SelectBox option
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input class="showOnEdit creatorComponents" type="text" id="selectPrefabInput_'+ selectBoxIdCounter +'" placeholder="AddOption">');
 
     //Add text input for providing coresponding value for option
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input class="showOnEdit creatorComponents" type="text" id="selectPrefabInputVal_'+ selectBoxIdCounter +'" placeholder="Option Value">');
 
     //Add button that will add option to SelectBox. Holds SelectBox and relevant input id's to access them
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input type="button" class="selectAddOptionButton showOnEdit creatorComponents" id="selectAddOptionButton_'+ selectBoxIdCounter+'"   selectBoxId="selectBox_' + selectBoxIdCounter + '"  selectNewOptionId="selectPrefabInput_' + selectBoxIdCounter + '" selectNewOptionValId="selectPrefabInputVal_' + selectBoxIdCounter + '" value="Add Option">');
 
     return formDivId;
@@ -280,12 +304,7 @@ const handleSelectPrefabSubmit = (callingButton) => {
     let inputOptionValId = $(callingButton).attr("selectnewoptionvalid");
     let selectBoxId = $(callingButton).attr("selectboxid");
 
-    let selectLabelInputId = $(callingButton).attr("selectLabelInputId");
-    let selectLabelId = $(callingButton).attr("selectLabelId");
 
-    
-
-    let newSelectLabel = $('#' + selectLabelInputId).val();
     let newOption = $('#' + inputOptionId).val();
     let newOptionVal = $('#' + inputOptionValId).val();
 
@@ -293,19 +312,22 @@ const handleSelectPrefabSubmit = (callingButton) => {
     {
         if($('#' + selectBoxId + " option").first().val() == "ReplaceDefault")
         {
+            //replace default placeholder option
             $('#' + selectBoxId + " option").replaceWith('<option value = ' + newOptionVal + ' >'+ newOption + '</option>');
-            $('#' + inputOptionId).val("");
-            $('#' + inputOptionValId).val("");
+            //$('#' + inputOptionId).val("");
+            //$('#' + inputOptionValId).val("");
         }
         else
         {
             $('#' + selectBoxId).append('<option value = ' + newOptionVal + ' >'+ newOption + '</option>');
-            $('#' + inputOptionId).val("");
-            $('#' + inputOptionValId).val("");
+            //$('#' + inputOptionId).val("");
+           // $('#' + inputOptionValId).val("");
         }
-        
+       
+        console.log('Added option... back to you true');
+        return true;
     }
-
+    return false;
         
 }
 

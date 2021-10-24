@@ -5,9 +5,11 @@
 //Creates the universal control buttons for editing related form fields, ie save, edit, delete, move, etc.
 const addPrefabControlDiv = (formDivId, formCountId) =>{
 
+    console.log(formDivId);
+
     //Create div for save/edit/ TODO(delete ,move up, movedown, copy)
 
-    $(formDivId).after('<div formId = form_"'+ formCountId +'" class="prefabControlsDiv creatorComponents" id="prefabControlsDiv_' + formCountId + '"></div>')
+    $('#'+formDivId).after('<div formId = form_"'+ formCountId +'" class="prefabControlsDiv creatorComponents" id="prefabControlsDiv_' + formCountId + '"></div>')
 
     //and change formControlDivId to add buttons
     let formControlDivId = '#prefabControlsDiv_' + formCountId;
@@ -37,30 +39,30 @@ const handleSaveForm = (callingButton) => {
 
     //$(formDivId + " label.questionHeader").text(fieldQuestion);
 
-    $(formDivId).children(".showOnEdit").hide();
-    $(formDivId).children(".hideOnEdit").show();
+    $('#'+formDivId).children(".showOnEdit").hide();
+    $('#'+formDivId).children(".hideOnEdit").show();
 
     //$(formDivId + " input:last").show();
-    $(formDivId).next().children(".showOnEdit").hide();
-    $(formDivId).next().children(".hideOnEdit").show();
+    $('#'+formDivId).next().children(".showOnEdit").hide();
+    $('#'+formDivId).next().children(".hideOnEdit").show();
 }
 
 const handleEditForm = (callingButton) => {
 
     let formDivId = $(callingButton).attr("formDivId");
 
-    $(formDivId).children(".showOnEdit").show();
-    $(formDivId).children(".hideOnEdit").hide();
+    $('#'+formDivId).children(".showOnEdit").show();
+    $('#'+formDivId).children(".hideOnEdit").hide();
 
-    $(formDivId).next().children(".showOnEdit").show();
-    $(formDivId).next().children(".hideOnEdit").hide();
+    $('#'+formDivId).next().children(".showOnEdit").show();
+    $('#'+formDivId).next().children(".hideOnEdit").hide();
 }	
 
 const handleMoveUpForm = (callingButton) => {
     let formId = $(callingButton).attr('formDivId');
-    let formControlId = $(formId).next('.prefabControlsDiv').attr('id');
+    let formControlId = $('#'+formId).next('.prefabControlsDiv').attr('id');
 
-    let previousFormId = $(formId).prevAll('.formField:first').attr('id');
+    let previousFormId = $('#'+formId).prevAll('.formField:first').attr('id');
 
     
 
@@ -69,8 +71,8 @@ const handleMoveUpForm = (callingButton) => {
 
     if(typeof previousFormId !== 'undefined')
     {
-        $(formId).insertBefore('#'+ previousFormId);
-        $('#' + formControlId).insertAfter(formId);
+        $('#'+formId).insertBefore('#'+ previousFormId);
+        $('#' + formControlId).insertAfter('#'+formId);
         return true;
     }
     else
@@ -81,7 +83,7 @@ const handleMoveDownForm = (callingButton) => {
     let formId = $(callingButton).attr('formDivId');
     
 
-    let nextFormId = $(formId).nextAll('.formField:first').attr('id');
+    let nextFormId = $('#'+formId).nextAll('.formField:first').attr('id');
     let otherFormControlId = $('#' + nextFormId).next('.prefabControlsDiv').attr('id');
 
 
@@ -89,7 +91,7 @@ const handleMoveDownForm = (callingButton) => {
 
     if(typeof nextFormId !== 'undefined')
     {
-        $('#'+ nextFormId).insertBefore(formId);
+        $('#'+ nextFormId).insertBefore('#'+formId);
         $('#' + otherFormControlId).insertAfter('#'+ nextFormId);
         return true;
     }
@@ -100,11 +102,11 @@ const handleMoveDownForm = (callingButton) => {
 
 const handleRemoveForm = (callingButton) => {
     let formId = $(callingButton).attr('formDivId');
-    let formControlId = $(formId).next('.prefabControlsDiv').attr('id');
+    let formControlId = $('#'+formId).next('.prefabControlsDiv').attr('id');
 
 
 
-    $(formId).remove();
+    $('#'+formId).remove();
     $('#' + formControlId).remove();
 }
 

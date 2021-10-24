@@ -31,12 +31,12 @@ class CheckBox {
     //____________________________________ Setters _______________________
     set idVal(newId)
     {
-        //this.IdVal = newId;
+        this._idVal = newId;
     }
     
     set position(newPosition)
     {
-        //this.position = newPosition;
+        this._position = newPosition;
     }
     
     /*
@@ -50,33 +50,33 @@ class CheckBox {
     //check if possible to just assign array (or even worth doing, since this system doesn't actually implenet this)
     set checkOptions(newCheckOptions)
     {
-        //this.checkOptions = newCheckOptions;
+        this._checkOptions = newCheckOptions;
     }
     
     //again, check if really worth, since functionally not possible (but nice for evetns such as check all above kind of things)
     set checked(newChecked) 
     {
-        //this.checked = newChecked;
+        this._checked = newChecked;
     }
    
     set question(newQuestion)
     {
-        //this.question = newQuestion;
+        this._question = newQuestion;
     }
     
     set label(newLabel)
     {
-        //this.label = newLabel;
+        this._label = newLabel;
     }
 
     //___________________________ Getters ________________________
     get idVal()
     {
-        return this.IdVal;
+        return this._idVal;
     }
     get position()
     {
-        return this.position;
+        return this._position;
     }
     //hold of on this
     // get parentFormId()
@@ -86,20 +86,20 @@ class CheckBox {
 
     get checkOptions()
     {
-        return this.checkOptions;
+        return this._checkOptions;
     }
 
     get checked() 
     {
-        return this.checked;
+        return this._checked;
     }
     get question()
     {
-        return this.question;
+        return this._question;
     }
-    get position()
+    get label()
     {
-        return this.label;
+        return this._label;
     }
 
     //_________________________________ Other functions _______________________
@@ -128,9 +128,9 @@ class CheckBox {
             //parentFormId : this.parentFormId 
             checkOptions : this.checkOptions,
             //numOptions : this.numOptions 
-            checked : this.checked,
-            question : this.question,
-            label : this.label
+            checked : this.checked== undefined? 0 : this.checked,
+            question : this.question===undefined ? "" : this.question,
+            label : this.label===undefined ? "" : this.label
 
         };
 
@@ -144,82 +144,102 @@ class CheckBox {
 //operations to determine which options in it's list are checked
 //Thus, in addition to a label,value relation, will also give a position in list, which is
 //the bit position in a number. ie, 4th checked option is (...0001000), 2nd and 3rd (...0000110), etc
-class checkOption{
-    
-    constructor(idVal, position, label, value, forFormId, isChecked)
+class CheckOption{
+    idVal;
+    position;
+    label;
+    value;
+    isChecked = false;
+    constructor(idVal, position, label, value, isChecked) // forFormId,
     {
         this.idVal = idVal;
         this.position = position;
         this.label = label;
         this.value = value;
-        this.forFormId = forFormId; //might need, since it does help with relating to checkboxInput to lable (TODO double check, might only be for selections
+        //this.forFormId = forFormId; //might not need
         this.isChecked = isChecked;
     }
 
     //____________________________________ Setters _______________________
     set idVal(newId)
     {
-       //this.IdVal = newId;
+       this._idVal = newId;
     }
     
     set position(newPosition)
     {
-        //this.position = newPosition;
+        this._position = newPosition;
     }
     
     
     set label(newLabel)
     {
-        //this.label = newLabel;
+        this._label = newLabel;
     }
     
     set value(newValue) 
     {
-        //this.value = newValue;
+        this._value = newValue;
     }
     
+    /*
     set forFormId(newFormId)
     {
         //.forFormId = newFormId;
     }
-    
+    */
     set isChecked(newCheckedState)
     {
-        //this.isChecked = newCheckedState;
+        this._isChecked = newCheckedState;
     }
 
    //___________________________ Getters ________________________
     get idVal()
     {
-        return this.IdVal;
+        return this._idVal;
     }
     
     get position()
     {
-        return this.position;
+        return this._position;
     }
     
     
     get label()
     {
-        return this.label;
+        return this._label;
     }
     
     get value() 
     {
-        return this.value;
+        return this._value;
     }
-    
+    /*
     get forFormId()
     {
         return this.forFormId;
     }
-    
+    */
     get isChecked()
     {
-        return this.isChecked;
+        return this._isChecked;
     }
 
+    //________________________ toJSON() __________
+
+    toJSON()
+    {
+        return {
+            idVal : this.idVal,
+            position : this.position, 
+            label : this.label,
+            value : this.value,
+            //forFormId : this.forFormId 
+            isChecked : this.checked
+
+        };
+
+    }
 
 
 }
@@ -230,47 +250,47 @@ const createCheckBoxPrefab = (targetSelector, formCounterId, checkBoxIdCounter) 
     let formDivId;
     //Insert Div for the MultipleChoice Section
     $(targetSelector).replaceWith('<div formId= "form_'+ formCounterId +'" class="checkPrefabDiv formField" id="checkPrefabDiv_' + checkBoxIdCounter + '"></div>');
-    formDivId = '#checkPrefabDiv_' + checkBoxIdCounter;
+    formDivId = 'checkPrefabDiv_' + checkBoxIdCounter;
 
     //Add Text input to set question
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input class="showOnEdit questionHeaderField creatorComponents" type="text" id="checkQuestionField_' + checkBoxIdCounter + '" labelId="checkQuestionLabel_' + checkBoxIdCounter + '" placeholder="Place question Here"><br>');
 
 
     //Add  the question
-    $(formDivId)
+    $('#'+formDivId)
     .append('<label class="questionHeader" id="checkQuestionLabel_' + checkBoxIdCounter + '" for="checkBox_' + checkBoxIdCounter + '"></label><br><br>');
 
     //Add the label for multiple choice
-    $(formDivId)
+    $('#'+formDivId)
     .append('<label  id="checkLabel_' + checkBoxIdCounter + '" for="checkBox_' + checkBoxIdCounter+ '">CheckBox'+checkBoxIdCounter+'</label>');
 
 
     //Add the Radio or checkbox Section. Will use a div to insert the inputs
-    $(formDivId)
+    $('#'+formDivId)
     .append('<div id="checkBox_' +checkBoxIdCounter + '"></div><br>');
 
 
     //Add text input for changing label for multiple choice (the name of radio group) (TODO Use on keystroke instead of submitting)
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input class="showOnEdit creatorComponents labelInput" type="text" id="checkLabelInput_'+ checkBoxIdCounter +'" labelId="checkLabel_' +checkBoxIdCounter + '" placeholder="Group Name:" >');
     
     //Add text input for adding multiple Choice option (the Label for one radio button)
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input class="showOnEdit creatorComponents" type="text" id="checkPrefabInput_'+ checkBoxIdCounter +'" placeholder="AddOption">');
 
 
 
 
     //Add text input for providing coresponding value for option (value for that radio button)
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input class="showOnEdit creatorComponents" type="text" id="checkPrefabInputVal_'+ checkBoxIdCounter +'" placeholder="Option Value">');
 
 
 
     //Add button that will add option to SelectBox. Holds SelectBox and relevant input id's to access them
     //TODO change key names to be more general here and in calling method. For now leave as is to keep functionality, but later make generic for both mulchoice and checks
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input type="button" class="checkAddOptionButton showOnEdit creatorComponents" id="checkAddOptionButton_'+ checkBoxIdCounter +'"  multipleChoiceId="checkBox_' + checkBoxIdCounter + '" labelId="checkLabel_'+ checkBoxIdCounter +'"  multNewOptionId="checkPrefabInput_' + checkBoxIdCounter + '"multNewOptionValId="checkPrefabInputVal_' + checkBoxIdCounter + '" formId="'+formCounterId+'" formType="checkbox" value="Add Option" >');
     
     return formDivId;
@@ -306,7 +326,8 @@ const handleCheckPrefabSubmit = (callingButton) => {
         
         $('#' + radioDivId)
         .append('<input type="'+formType+'" id="' + optionName +'_'+ formId + '" name="' + currentGroupName + ' " value="' + optionValue + '" >')
-        .append('<label for="' + optionName +'_'+ formId + '">'+ optionName +'</label>'); 
+        .append('<label for="' + optionName +'_'+ formId + '">'+ optionName +'</label>');
+        return true; 
 
     }
     else
@@ -321,6 +342,7 @@ const handleCheckPrefabSubmit = (callingButton) => {
             $(callingButton).css({"border": "", "background-color": "", "border-radius": ""}).next().remove();
             $(callingButton).show();
         }, 2000);
+        return false;
     }
 
     
@@ -332,4 +354,4 @@ const handleCheckPrefabSubmit = (callingButton) => {
 //TODO
 //Maybe handle creating the CheckBox for the actual survey in another funtion, that extrapolates from given variables what it looks like
 
-export{createCheckBoxPrefab, handleCheckPrefabSubmit, CheckBox, checkOption};
+export{createCheckBoxPrefab, handleCheckPrefabSubmit, CheckBox, CheckOption};

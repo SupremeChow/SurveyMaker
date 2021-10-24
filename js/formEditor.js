@@ -2,7 +2,7 @@ import {addPrefabControlDiv, handleSaveForm, handleEditForm, handleMoveUpForm, h
 //import{} from './buttonEventHandlers.js'
 
 
-import{createCheckBoxPrefab, handleCheckPrefabSubmit, CheckBox, checkOption} from './checkBox.js'
+import{createCheckBoxPrefab, handleCheckPrefabSubmit, CheckBox, CheckOption} from './checkBox.js'
 import{createMultChoicePrefab, handleMultPrefabSubmit, MultipleChoice, MultOption} from './multipleChoice.js'
 import{createSelectBoxPrefab, handleSelectPrefabSubmit, SelectBox, SelectOption} from './selectBox.js'
 import{createShortAnswerPrefab, handleShortAnsPrefabSubmit, ShortAnswer} from './shortAns.js'
@@ -40,20 +40,17 @@ Main: As classes are moved to seperate files, start implementing state of form t
         1) implement setting relevant data to new chosen formType when placeholder is destroyed
         2) Handle looping through formList[] affecting placeholder
 
-        currently, fixed move up/down, need to handle order with delete
-        Right now, primarily setting up classes for rest of form types, finish that, then move to delete
 
 
-        !!! Label for Paragraph ?????  Still think maybe not necessar.... ***************
-
-        !!! toJSON for options?????
+        !!! Label for Paragraph ?????  Still think maybe not necessary.... ***************
 
 
         10/23 Early morning: Main fix now: 
-            * ensure label and header updates change 
-            * delete properly updates state and formList[]
+            * ensure label and header updates change  | check!!!!
             * Tie Publish button to creating JSON of state, and test pushing to php
             * everything else
+            
+
         
 
 */
@@ -71,7 +68,7 @@ const multipleChoiceOptionTags = '<option value = "multipleChoice"> Multiple Cho
 const checkBoxOptionTags = '<option value = "checkBox"> Check Box </option>' ;
 const starTags = '<option value = "starRating"> Star Rating </option>' ;
 
-const formSelector = '<select class="formSelectorMenu creatorComponents"><option value = "" selected="selected">Select a form type</option>' + selectBoxOptionTags + shortParagraphOptionTags + shortAnswerOptionTags + multipleChoiceOptionTags + checkBoxOptionTags + starTags + ' </select> <br>';
+const formSelector = '<select class="formSelectorMenu creatorComponents"><option value = "" selected="selected">Select a form type</option>' + selectBoxOptionTags + shortParagraphOptionTags + shortAnswerOptionTags + multipleChoiceOptionTags + checkBoxOptionTags + starTags + ' </select><br>';
 //const selectPrefab = '<form><select id="abcSelection"></select><input type="text" id="newOptionName" placeholder="AddOption" value=""><input type="button" class="addNewOptionButton" value="Add Option"></form>'
 
 //A limit for max characters that the webhost/company will allow an author to set. Author is free to set it to less
@@ -148,19 +145,20 @@ $(document).on('click', '.moveUpButton', (callingButton) =>
 
     if(didMove)
     {
-        console.log('checking list BEFORE move up...:', formList);
 
         //swap in main list
         let targetPos;
-        let targetForm = formList.filter((aForm, index) => {
+        formList.filter((aForm, index) => {
 
-            console.log('Checking against : ', aForm.idVal, index);
-            if(aForm.idVal === $(callingButton.target).attr('formDivId'))
-            {
-                targetPos = index;
-                return true;
-            }
-            return false;
+        if(aForm.idVal === $(callingButton.target).attr('formDivId'))
+        {
+
+            targetPos = index;
+            //and change it's position value while here
+            aForm.position = index - 1;
+            return true;
+        }
+        return false;
             
         });
 
@@ -171,22 +169,15 @@ $(document).on('click', '.moveUpButton', (callingButton) =>
         //formList[targetPos-1] 
         let tempForm = formList.splice(targetPos, 1, formList[targetPos-1])[0];
 
-        console.log('the spliced removed', tempForm);
-
-        console.log(' formList should only be one, the previous',formList);
         formList.splice(targetPos-1, 1, tempForm);
 
+    
+        formList[targetPos].position = targetPos;
+        
 
 
 
-
-
-        console.log('checking list change up...:');
-
-        formList.forEach((object, index) => {
-
-            console.log('object, index : ', object, index);
-        });
+ 
     }
     
 });
@@ -202,15 +193,15 @@ $(document).on('click', '.moveDownButton', (callingButton) =>
     let didMove = handleMoveDownForm($(callingButton.target));
     if(didMove)
     {
-        console.log('checking list BEFORE move down...:', formList);
         //swap in main list
         let targetPos;
-        let targetForm = formList.filter((aForm, index) => {
+        formList.filter((aForm, index) => {
 
-            console.log('Checking against : ', aForm.idVal, index);
             if(aForm.idVal === $(callingButton.target).attr('formDivId'))
             {
                 targetPos = index;
+                //and change it's position value while here
+                aForm.position = index + 1;
                 return true;
             }
             return false;
@@ -220,25 +211,14 @@ $(document).on('click', '.moveDownButton', (callingButton) =>
         //use Object.assign(target, source) to create copy
         let tempForm = formList.splice(targetPos,1,formList[targetPos+1])[0];
 
-        
-        console.log(' formList should only be two', formList);
-
-
 
         formList.splice(targetPos+1, 1, tempForm);
 
+        //..and update position of swapped element
+        formList[targetPos].position = targetPos;
 
 
-
-
-        console.log('checking list change down...:', formList);
-
-        console.log('checking list change up...:');
-
-        formList.forEach((object, index) => {
-
-            console.log('object, index : ', object, index);
-        });
+       
     }
 });
 
@@ -276,24 +256,101 @@ $(document).on('click', '.removeButton', (callingButton) =>
         starCounter--;
     }
 
+
+    //Before deleting, remove and shift all positions in formList
+    //get Position in list
+    let formId = $(callingButton.target).attr('formDivId');
+    let position;
+    let decrementFlag = false; //use this to signal the loop to decrement next elements
+    formList.every((aForm, index) => {
+        if(decrementFlag)
+        {
+            //decrement position values while in this loop
+            aForm.position = index - 1;
+        }
+        if(aForm.idVal === (formId))
+        {
+            decrementFlag = true;
+            position = index;
+            
+        }
+        return true;
+    });
+
+    //if there trailing forms, do a splice
+    if(position < formList.length-1)
+    {
+        
+        let shiftedForms = formList.splice(position+1);
+        formList.splice(position, 1, ...shiftedForms);
+        
+    }
+    else
+    {
+        //else just pop
+        formList.pop();
+    }
+        
+
     formCounter--;
     
     handleRemoveForm($(callingButton.target));
+
+
 });
 
+
+
+// ********** ___________VVVVVVVVVVVVVVVVV     All these handlers update the DOM state, so also update their coresponding object in formList
 
 
 //_____________________________________________________________________________________________________________
 //____________________________________ Handlers for Editing Form Properties ____________________________
 //_____________________________________________________________________________________________________________
 
+//Note: Things are sort of handled as if MVC, where first update view (jquery and html), then update changes to model (data in formList)
+//One thing that could be done different is have the View actionHandler return values, instead of a boolean,
+//which the model can use to adjust, rather than recall all the commands to get the same updated inputs.
+//For now, too fat in, would be nice to change in future
 
 
 //selectAddOptionButton
 $(document).on('click', '.selectAddOptionButton', (callingButton) =>
 {
     
-    handleSelectPrefabSubmit($(callingButton.target));
+    let hasChanged = handleSelectPrefabSubmit($(callingButton.target));
+
+    if(hasChanged)
+    {
+        let inputOptionId = $(callingButton.target).attr('selectNewOptionId');
+        let inputOptionValId = $(callingButton.target).attr('selectNewOptionValid');
+    
+    
+        let newOption = $('#' + inputOptionId).val();
+        let newOptionVal = $('#' + inputOptionValId).val();
+
+        console.log(newOption, newOptionVal, '---------------');
+
+
+        //update object data:  append option to checkOption
+
+
+        formList.every((aForm, index) => {
+
+            console.log(aForm.idVal, $(callingButton.target).parent('.formField').attr('id'));
+            if(aForm.idVal === $(callingButton.target).parent('.formField').attr('id'))
+            {
+                let newSelectOption = new SelectOption(aForm.selectOptions.length, newOption, newOptionVal, false); 
+
+                aForm.selectOptions.push(newSelectOption);
+                console.log(aForm);
+                
+                return false;
+            }
+            return true;
+            
+        });
+    }
 });
 
 
@@ -302,7 +359,36 @@ $(document).on('click', '.selectAddOptionButton', (callingButton) =>
 $(document).on('click', '.shortParaChangeAttrButton ', (callingButton) =>
 {
     
-    handleShortParaPrefabSubmit($(callingButton.target));
+    let hasChanged = handleShortParaPrefabSubmit($(callingButton.target));
+
+    if(hasChanged)
+    {
+
+        let placeHolderInputId = $(callingButton.target).attr("placeHolderId");
+        let newPlaceHolder = $('#' + placeHolderInputId).val();
+
+        let maxCharId = $(callingButton.target).attr("shortParaCharLimId");
+        let newCharLim = $('#' + maxCharId).val();
+
+
+    
+
+        //update object data
+
+
+        formList.every((aForm, index) => {
+            if(aForm.idVal === $(callingButton.target).parent('.formField').attr('id'))
+            {
+                aForm.placeHolderText = newPlaceHolder;
+                aForm.characterLim = newCharLim;
+                
+                return false;
+            }
+            return true;
+            
+        });
+    }
+
 });
 
 
@@ -311,7 +397,38 @@ $(document).on('click', '.shortParaChangeAttrButton ', (callingButton) =>
 $(document).on('click', '.shortAnsChangeAttrButton ', (callingButton) =>
 {
     
-    handleShortAnsPrefabSubmit($(callingButton.target));
+    let hasChanged = handleShortAnsPrefabSubmit($(callingButton.target));
+    if(hasChanged)
+    {
+
+        let placeHolderInputId = $(callingButton.target).attr("placeHolderId");
+        let newPlaceHolder = $('#' + placeHolderInputId).val();
+
+        let maxCharId = $(callingButton.target).attr("shortAnsCharLimId");
+        let newCharLim = $('#' + maxCharId).val();
+
+
+    
+
+        //update object data
+
+
+        formList.every((aForm, index) => {
+            if(aForm.idVal === $(callingButton.target).parent('.formField').attr('id'))
+            {
+                
+                
+                aForm.placeHolderText = newPlaceHolder;
+                aForm.characterLim = newCharLim;
+
+                
+                return false;
+            }
+            return true;
+            
+        });
+    }
+
 });
 
 
@@ -322,25 +439,147 @@ $(document).on('click', '.shortAnsChangeAttrButton ', (callingButton) =>
 $(document).on('click', '.multAddOptionButton', (callingButton) =>
 {
     
-    handleMultPrefabSubmit($(callingButton.target));
+    let hasChanged = handleMultPrefabSubmit($(callingButton.target));
+
+    if(hasChanged)
+    {
+        let formId = $(callingButton.target).attr("formId"); 
+
+
+        let optionNameId = $(callingButton.target).attr("multNewOptionId");
+        let optionName = $('#' + optionNameId).val();
+    
+        let optionValueId = $(callingButton.target).attr("multNewOptionValId"); 
+        let optionValue = $('#' + optionValueId).val();
+
+        //update object data:  append option to checkOption
+
+
+        formList.every((aForm, index) => {
+            if(aForm.idVal === $(callingButton.target).parent('.formField').attr('id'))
+            {
+                let newMultOption = new MultOption(optionName+'_'+formId, aForm.multOptions.length, optionName, optionValue, false);
+
+                aForm.multOptions.push(newMultOption);
+                
+                return false;
+            }
+            return true;
+            
+        });
+    }
 });
+
+
 $(document).on('click', '.checkAddOptionButton ', (callingButton) =>
 {
     
-    handleCheckPrefabSubmit($(callingButton.target));
+    let hasChanged = handleCheckPrefabSubmit($(callingButton.target));
+
+    if(hasChanged)
+    {
+        let formId = $(callingButton.target).attr("formId"); 
+
+
+        let optionNameId = $(callingButton.target).attr("multNewOptionId");
+        let optionName = $('#' + optionNameId).val();
+    
+        let optionValueId = $(callingButton.target).attr("multNewOptionValId"); 
+        let optionValue = $('#' + optionValueId).val();
+
+        //update object data:  append option to checkOption
+
+
+        formList.every((aForm, index) => {
+            if(aForm.idVal === $(callingButton.target).parent('.formField').attr('id'))
+            {
+                let newMultOption = new CheckOption(optionName+'_'+formId, aForm.checkOptions.length, optionName, optionValue, false);
+
+                aForm.checkOptions.push(newMultOption);
+                
+                return false;
+            }
+            return true;
+            
+        });
+    }
 });
+
+
 
 
 
 //use to handle when updating number of stars for star rating
 $(document).on('change', '.starCountInput', (event) => {
+
     
     //call updateStarCount, since this and on.input will need to be checked
-    updateStarCount(event, starImgPth, emptyStarImgPth);
+    let numStars = updateStarCount(event, starImgPth, emptyStarImgPth);
+
+    //update starCount of the relevant class
+    // Also change the value of how many stars selected (selectedOption), value being 3 for numStars >= 3, numStars everything else
+
+
+
+    formList.every((aForm, index) => {
+        console.log(aForm.idVal, $(event.target).attr('formDivId')) ;
+        if(aForm.idVal === $(event.target).attr('formDivId'))
+        {
+            console.log('matcher here...')
+            aForm.numStars = numStars;
+            console.log('numstar set as:, and excpeected: ', aForm.numStars, numStars);
+            aForm.selectedOption = (numStars > 3) ? 3 : numStars;
+            return false;
+        }
+        return true;
+        
+    });
+
+
+
+
+
+
+
 
 });
 
+//use this to handle star rating click (click lable image of star, update radio button), and setting data value
+$(document).on('click', '.starButton', (event) => {
 
+    
+
+    let radioId = $(event.target).parent("label").attr("for");
+
+
+
+    $('#' + radioId).click(); //click coresponding radio button
+
+    //set clicked star as full star
+    $(event.target).attr('src', starImgPth);
+    //set previous sibling label images to full star
+    $(event.target).parent().prevAll('label').each( (index, object) => {
+        $(object).children('img').attr('src', starImgPth); 
+    });
+    //set fllowing sibling label images to full star
+    $(event.target).parent().nextAll('label').each( (index, object) => {
+        $(object).children('img').attr('src', emptyStarImgPth); 
+    });
+
+
+    let theFormDiv = $(event.target).parent().parent().parent('.formField').attr('id'); 
+
+    formList.every((theFormObject) => {
+        if(theFormObject.idVal !== theFormDiv)
+            return true;
+        else
+        {    
+            theFormObject.selectedOption = $('#'+ radioId).attr('value');
+            return false;
+        }
+    });
+
+});
 
 
 
@@ -364,14 +603,14 @@ $(document).on('change', '.starCountInput', (event) => {
 //TODO ----------------------- VVVVVVVVVVVVVVVVVVVVVVVVVVV  redundant i think, think i removed all buttons tied to updating title
 
 //publishes the title when user submits changes
-const updateTitle = (callingButton)=> {
+// const updateTitle = (callingButton)=> {
 
-    console.log("The button updating title",callingButton);
-    let titleInput = $(callingButton).siblings(".questionHeaderField").val();
-    console.log("finding title field ", titleInput);
+//     console.log("The button updating title",callingButton);
+//     let titleInput = $(callingButton).siblings(".questionHeaderField").val();
+//     console.log("finding title field ", titleInput);
 
-    $(callingButton).siblings(".questionHeader").text(titleInput);
-}
+//     $(callingButton).siblings(".questionHeader").text(titleInput);
+// }
 
 
 //------------------------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  
@@ -398,17 +637,19 @@ $(document).on('input','.labelInput' , (event)=>{
             $('label#' + updatingLabelId).next().children('input').attr('name', currentWord);
         }
 
+        //use parent formDiv to get position, which can access to formList to update label variable (! if not paragraph, unless later inplement label for paragraph)
+        let theFormDiv = $(event.target).parent('.formField').attr('id');
+        formList.every((theFormObject) => {
+            if(theFormObject.idVal !== theFormDiv)
+                return true;
+            else
+            {    
+                theFormObject.label = currentWord;
+                return false;
+            }
+        });
 
 
-//_______-------- VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  -------------------- VVVVVVVVVVVVVV
-
-
-        //TODO update the data of coresponding object
-
-
-
-
-        //_______----MMMMMMMMMMMMMMMMMM  -------------------- MMMMMMMMMMMMMMMMMMMMMM
     });	
 
 
@@ -421,56 +662,23 @@ $(document).on('input','.questionHeaderField' , (event)=>{
     let updatingLabelId = $(event.target).attr("labelId");
     $('label#' + updatingLabelId).text(currentWord);
 
-
-//_______-------- VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  -------------------- VVVVVVVVVVVVVV
-
-
-        //TODO update the data of coresponding object
-
-
-
-
-        //_______----MMMMMMMMMMMMMMMMMM  -------------------- MMMMMMMMMMMMMMMMMMMMMM
+    //use parent formDiv to get position, which can access to formList to update Question/header variable (! if not paragraph, unless later inplement label for paragraph)
+    let theFormDiv = $(event.target).parent('.formField').attr('id');
+    formList.every((theFormObject) => {
+        if(theFormObject.idVal !== theFormDiv)
+            return true;
+        else
+        {    
+            theFormObject.question = currentWord;
+            return false;
+        }
+    });
 
 });	
 
 
 
-//use this to handle star rating click (click lable image of star, update radio button)
-$(document).on('click', '.starButton', (event) => {
 
-    
-
-    let radioId = $(event.target).parent("label").attr("for");
-
-
-
-    $('#' + radioId).click(); //click coresponding radio button
-
-    //set clicked star as full star
-    $(event.target).attr('src', starImgPth);
-    //set previous sibling label images to full star
-    $(event.target).parent().prevAll('label').each( (index, object) => {
-        console.log(object);
-        console.log();
-        $(object).children('img').attr('src', starImgPth); 
-    });
-    //set fllowing sibling label images to full star
-    $(event.target).parent().nextAll('label').each( (index, object) => {
-        $(object).children('img').attr('src', emptyStarImgPth); 
-    });
-
-    //_______-------- VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  -------------------- VVVVVVVVVVVVVV
-
-
-        //TODO update the data of coresponding object
-
-
-
-
-        //_______----MMMMMMMMMMMMMMMMMM  -------------------- MMMMMMMMMMMMMMMMMMMMMM
-
-});
 
 
 
@@ -507,8 +715,8 @@ $(document).ready(() => {
         case "selectBox":
             
             formDivId = createSelectBoxPrefab(targetSelector, thisFormId, selectBoxIdCounter);
-            let newSelect = new SelectBox(targetSelector, thisFormPos, '', 'SelectBox'+selectBoxIdCounter);
-            formList.push(newSelect);
+            let newSelect = new SelectBox(formDivId, thisFormPos, '', 'SelectBox'+selectBoxIdCounter);
+            formList.splice(thisFormPos,1,newSelect);
 
             //Increment number of SelectBox counter
             selectBoxIdCounter++;
@@ -529,9 +737,10 @@ $(document).ready(() => {
             formDivId = createShortParagraphPrefab(targetSelector, thisFormId, shortParagraphIdCounter, SURVEY_MAX_CHAR_LIMIT);
 
             //TODO, if decide to change mind and add a label for the paragraph, be sure to include with constructor
-            let newShortPara = new ShortParagraph(targetSelector, thisFormPos, '', SURVEY_MAX_CHAR_LIMIT, '');
+            let newShortPara = new ShortParagraph(formDivId, thisFormPos, '', SURVEY_MAX_CHAR_LIMIT, '');
 
-            formList.push(newShortPara);
+            //formList.push(newShortPara);
+            formList.splice(thisFormPos,1,newShortPara);
 
             //Increment number of SelectBox counter
             shortParagraphIdCounter++;
@@ -552,9 +761,10 @@ $(document).ready(() => {
             
             formDivId = createShortAnswerPrefab(targetSelector, thisFormId, shortAnswerIdCounter, SURVEY_MAX_CHAR_LIMIT);
 
-            let newShortAns = new ShortAnswer(targetSelector, thisFormPos, '', 'ShortAnswer'+shortAnswerIdCounter, SURVEY_MAX_CHAR_LIMIT, '');
+            let newShortAns = new ShortAnswer(formDivId, thisFormPos, '', 'ShortAnswer'+shortAnswerIdCounter, SURVEY_MAX_CHAR_LIMIT, '');
 
-            formList.push(newShortAns);
+            //formList.push(newShortAns);
+            formList.splice(thisFormPos,1,newShortAns);
 
             //Increment number of SelectBox counter
             shortAnswerIdCounter++;
@@ -574,9 +784,8 @@ $(document).ready(() => {
             formDivId=  createCheckBoxPrefab(targetSelector, thisFormId, checkBoxIdCounter);
             let newCheckBox = new CheckBox(formDivId, thisFormPos, '', 'CheckBox'+checkBoxIdCounter);
 
-            formList.push(newCheckBox);
-
-            console.log(formList);
+           // formList.push(newCheckBox);
+           formList.splice(thisFormPos, 1, newCheckBox);
 
             checkBoxIdCounter++;
             checkBoxCounter++;
@@ -595,7 +804,8 @@ $(document).ready(() => {
             formDivId =  createMultChoicePrefab(targetSelector, thisFormId, multipleChoiceIdCounter);
             let newMultChoice = new MultipleChoice(formDivId, thisFormPos, '', 'MultipleChoice'+multipleChoiceIdCounter);
 
-            formList.push(newMultChoice);
+            //formList.push(newMultChoice);
+            formList.splice(thisFormPos, 1, newMultChoice);
 
 
             multipleChoiceIdCounter++;
@@ -616,8 +826,9 @@ $(document).ready(() => {
 
             formDivId = createStarRatingPrefab(targetSelector, thisFormId, starIdCounter, starImgPth, emptyStarImgPth, STAR_RATING_MAX_STAR_LIMIT);
 
-            let newStarRating = new StarRating(targetSelector, thisFormPos, 5, 3, '', 'StarRating'+starIdCounter)
-            formList.push(newStarRating);
+            let newStarRating = new StarRating(formDivId, thisFormPos, 5, 3, '', 'StarRating'+starIdCounter)
+            //formList.push(newStarRating);
+            formList.splice(thisFormPos, 1, newStarRating);
 
             //Increment number of SelectBox counter
             starIdCounter++;
@@ -665,11 +876,16 @@ $(document).ready(() => {
         //Need to set a formId attribute, so that order of new forms added correctly
         //In a way, these are placeHolders in formList[]
         //Will need to filter/map the list when converting to JSON/Publishing to remove all placeholders and update order values
-        $('#newFormElementButton').prevAll('.formSelectorMenu:first').attr('formId', formCounterId).attr('id', 'PlaceHolder_' + formCounterId).attr('formPos', formCounter);
+        $('#newFormElementButton').prevAll('.formSelectorMenu:first').attr('formId', formCounterId).attr('id', 'PlaceHolder_' + formCounterId).attr('formPos', formCounter).addClass('formField');
+
+        //then push a blank object with relevant position and class (NOTE, use idVal, since not too relevant that it repeats, just need to set it so that we have placeholder)
+        formList.push({idVal:'placeHolder', position: formCounter});
+
 
         formCounterId++;
         formCounter++;
 
+        $(".formField").css({"border": "thin double black", "background-color": "rgba(0,100,150,0.15)", "margin" : "3px", "padding": "16px"});
         // //refresh footer
         // $('.footer').css('top', '100%');
     });
@@ -703,27 +919,15 @@ $(document).ready(() => {
         //remove publish button
         $("#publishPageButton").remove();
 
-        /* hold off on this, not working TODO TODO TODO
-        //remove any empty space from non titles or labels
-        $('label').each(()=>{
+        
 
-            console.log('tagname: ', $(this).prop('tagName'));
-            if($(this).text() == "" || $(this).val() == "")
-            {
-                
-                console.log('Bawleeted!');
-                $(this).remove(this);
-            }
-                
+        //TESTING JSON
+
+        formList.every((thing)=> {
+            console.log(thing.toJSON());
         });
 
-        //remove concuring <br>
-        $('br').each(()=>{
-            //console.log('nodename: ', $(this).prop('tagName'));
-            if($(this).next().prop('tagName') == 'br')
-                $(this).remove(this);
-        });
-        */
+        
 
         $("form").append('<input type="submit" value="Submit Survey">');//'<buton type="submit" form="formStart">Submit Survey</button>');
     
@@ -741,4 +945,4 @@ $(document).ready(() => {
 
 export {handleSaveForm, handleEditForm, handleMoveUpForm, handleMoveDownForm, handleRemoveForm, 
     handleSelectPrefabSubmit, handleShortParaPrefabSubmit, handleShortAnsPrefabSubmit, handleMultPrefabSubmit, 
-    updateStarCount, updateTitle};
+    updateStarCount}; // Hold off on this, may be redundant updateTitle

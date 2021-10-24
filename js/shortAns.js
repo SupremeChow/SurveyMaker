@@ -25,22 +25,22 @@ class ShortAnswer
 
     //____________________________________________ setters _________________________________
 
-    set idVal(newIdVal){};
-    set position(newPosition){};
-    set question(newQuestion){};
-    set label(newLabel){};
-    set characterLim(newCharLim){};
-    set placeHolderText(newPlaceHolder){};
+    set idVal(newIdVal){this._idVal = newIdVal;}
+    set position(newPosition){this._position = newPosition;}
+    set question(newQuestion){this._question = newQuestion;}
+    set label(newLabel){this._label = newLabel;}
+    set characterLim(newCharLim){this._characterLim = newCharLim;}
+    set placeHolderText(newPlaceHolder){this._placeHolderText = newPlaceHolder;}
 
 
     //____________________________________________ getters _________________________________
 
-    get idVal(){return this.idVal};
-    get position(){return this.position};
-    get question(){return this.question};
-    get label(){return this.label};
-    get characterLim(){return this.characterLim};
-    get placeHolderText(){return this.placeHolderText};
+    get idVal(){return this._idVal}
+    get position(){return this._position}
+    get question(){return this._question}
+    get label(){return this._label}
+    get characterLim(){return this._characterLim}
+    get placeHolderText(){return this._placeHolderText}
 
     //__________________________________________ Other Methods and functions ________________
 
@@ -67,42 +67,42 @@ const createShortAnswerPrefab = (targetSelector, formCounterId, shortAnswerIdCou
 
     //Insert Div for the shortParagraph Section
     $(targetSelector).replaceWith('<div formId = form_"'+ formCounterId +'" class="shortAnsPrefabDiv formField" id="shortAnsPrefabDiv_' + shortAnswerIdCounter + '"></div>');
-    formDivId = '#shortAnsPrefabDiv_' + shortAnswerIdCounter;
+    formDivId = 'shortAnsPrefabDiv_' + shortAnswerIdCounter;
 
     //Add Text input to set question
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input type="text" class="showOnEdit questionHeaderField creatorComponents" id="shortAnsQuestionField_' + shortAnswerIdCounter + '" labelId="shortAnsQuestionLabel_' + shortAnswerIdCounter + '" placeholder="Place question Here"><br>');
 
     //Add the question 
-    $(formDivId)
+    $('#'+formDivId)
     .append('<label class="questionHeader" id="shortAnsQuestionLabel_' + shortAnswerIdCounter + '" for="shortAnsTextArea_' + shortAnswerIdCounter + '"></label><br><br>');
     
 
     //Add the label infront of the text field
-    $(formDivId)
+    $('#'+formDivId)
     .append('<label id="shortAnsLabel_' + shortAnswerIdCounter + '" for="shortAnsTextArea_' + shortAnswerIdCounter + '">ShortAnswer'+shortAnswerIdCounter+'</label>');
     
 
     //Add the TextField (Does nothing, there for viewing purposes and showing Author defaults if any) (while size is set here, its assume that text area can be resizeable from user)
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input type="text" id="shortAnsTextArea_' + shortAnswerIdCounter + '" name="shortAns_' + shortAnswerIdCounter + '" placeholder="Placeholder Text"  maxlength="'+ SURVEY_MAX_CHAR_LIMIT +'"><br>');
 
 
 
     //Add text input for changing input field label
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input type="text" class="showOnEdit creatorComponents labelInput" id="shortAnsLabelInput_'+ shortAnswerIdCounter +'" labelId="shortAnsLabel_' + shortAnswerIdCounter + '" placeholder="Change Label:">');
 
     //Add text input for changing placeholder textbox message
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input type="text" class="showOnEdit creatorComponents" id="shortAnsDefaultMes_'+ shortAnswerIdCounter +'" placeholder="Change placeholder message">');
 
     //Add text input for character limit
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input type="number" class="showOnEdit creatorComponents" id="shortAnsCharLimit_'+ shortAnswerIdCounter +'" placeholder="Enter character Limit (max '+ SURVEY_MAX_CHAR_LIMIT +')" max = "'+ SURVEY_MAX_CHAR_LIMIT +'" min = "0">');
 
     //Add button that will add options to ShortAnswer. Holds ShortAnswer textfield and relevant input id's to access them
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input type="button" class="shortAnsChangeAttrButton showOnEdit creatorComponents" id="shortAnswChangeAttrButton_'+ shortAnswerIdCounter+'" shortAnsId="shortAnsTextArea_' + shortAnswerIdCounter + '" placeHolderId="shortAnsDefaultMes_' + shortAnswerIdCounter + '" shortAnsCharLimId="shortAnsCharLimit_'+ shortAnswerIdCounter +'" value="Apply Options" >');
 
     return formDivId;
@@ -134,6 +134,8 @@ const handleShortAnsPrefabSubmit = (callingButton) => {
         $('#' + shortAnsTextAreaId).attr("placeholder", newPlaceHolder);
         $('#' + shortAnsTextAreaId).attr("max", newCharLim);
 
+        return true;
+
         //change label infront of text field
         //$('#' + inputLabelId).text(newInputLabel);
     }
@@ -149,11 +151,12 @@ const handleShortAnsPrefabSubmit = (callingButton) => {
             $(callingButton).show();
         }, 2000);
         
+        return false;
     
     }
 
     //publish Title
-    updateTitle(callingButton);
+   // updateTitle(callingButton);
     
     //Won't clear text fields, they are used to change, not add to the form field
 }

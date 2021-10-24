@@ -27,23 +27,23 @@ class StarRating
 
     //___________________________________________ Setters __________________________
 
-    set idVal(newId){};
-    set position(newPosition){};
+    set idVal(newId){this._idVal = newId;};
+    set position(newPosition){this._position = newPosition;};
     //set parentFormId(newParent){}; //Hold off on this, may be nice to have for db, but no focus right now
-    set numStars(newNumStars){};
-    set selectedOption(newSelection){};
-    set question(newQuestion){};
-    set label(newLabel){};
+    set numStars(newNumStars){this._numStars = newNumStars;};
+    set selectedOption(newSelection){this._selectedOption = newSelection};
+    set question(newQuestion){this._question = newQuestion};
+    set label(newLabel){this._Label = newLabel};
 
     //___________________________________________ Getters __________________________
     
-    get idVal(){return this.idVal};
-    get position(){return this.position};
+    get idVal(){return this._idVal};
+    get position(){return this._position};
     //get parentFormId(){return this.parentForimId;}; //Hold off on this, may be nice to have for db, but no focus right now
-    get numStars(){return this.numStars};
-    get selectedOption(){return this.selectedOption};
-    get question(){return this.question};
-    get label(){return this.label};
+    get numStars(){return this._numStars};
+    get selectedOption(){return this._selectedOption};
+    get question(){return this._question};
+    get label(){return this._label};
 
 
 
@@ -82,55 +82,55 @@ const createStarRatingPrefab = (targetSelector, formCounterId, starIdCounter, st
     let formDivId;
     //Insert Div for the MultipleChoice Section
     $(targetSelector).replaceWith('<div formId= "form_'+ formCounterId +'" class="starPrefabDiv formField" id="starPrefabDiv_' + starIdCounter + '"></div>');
-    formDivId = '#starPrefabDiv_' + starIdCounter;
+    formDivId = 'starPrefabDiv_' + starIdCounter;
 
     //Add Text input to set question
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input class="showOnEdit questionHeaderField creatorComponents" type="text" id="starQuestionField_' + starIdCounter + '" labelId="starQuestionLabel_' + starIdCounter + '" placeholder="Place question Here"><br>');
 
 
     //Add  the question
-    $(formDivId)
+    $('#'+formDivId)
     .append('<label class="questionHeader" id="starQuestionLabel_' + starIdCounter + '" for="starRating_' + starIdCounter + '"></label><br><br>');
 
     //Add the label for starRating
-    $(formDivId)
+    $('#'+formDivId)
     .append('<label  id="starLabel_' + starIdCounter + '" for="starRating_' + starIdCounter + '">StarRating'+starIdCounter+'</label>');
 
 
 
 
     //Add the Radio Section. Will use a div to insert the inputs
-    $(formDivId)
+    $('#'+formDivId)
     .append('<div class="starRatingDiv" id="starRating_' + starIdCounter + '" idCounterId='+starIdCounter+'></div>');
     //add to the div the deafualt 5 'star' buttons
     let tempLabel = $('#starLabel_' + starIdCounter).text() + '_' + starIdCounter;
     let chosenImage;
     for(let i = 0; i < 5; i++)
     {
-        chosenImage = (i <= 3)? starImgPth : emptyStarImgPth;
+        chosenImage = (i < 3)? starImgPth : emptyStarImgPth;
         //add an input of type 'radio', with relavant attributes. Make display:none so that only label shows, thus providing an image to click
-        $(formDivId).children().last()
+        $('#'+formDivId).children().last()
         .append('<input type="radio" id="starRating_'+ starIdCounter+'_' + i + '" name="' + tempLabel + '" value="'+ i +'" style="visibility:hidden">')  
         .append('<label for="starRating_'+ starIdCounter+'_' + i + '"><img class="starButton" src="'+ chosenImage +'"  width="20" height="20"></img></label>'); 
     }
     
 
     //Add text input for changing label for star rating (the name of radio group) (TODO Use on keystroke instead of submitting)
-    $(formDivId)
+    $('#'+formDivId)
     .append('<input class="showOnEdit creatorComponents labelInput" type="text" id="starLabelInput_'+ starIdCounter +'" labelId="starLabel_' + starIdCounter + '" placeholder="Group Name:" >');
 
     //Add select box for choosing number (too many issues with using input field, couldn't properly prevent non-number or empty field)
-    $(formDivId)
-    .append('<select class="showOnEdit creatorComponents starCountInput"  id="starPrefabInput_'+ starIdCounter +'" placeholder="numStars" ></select>');
+    $('#'+formDivId)
+    .append('<select class="showOnEdit creatorComponents starCountInput"  id="starPrefabInput_'+ starIdCounter +'" placeholder="numStars" formDivId ="' + formDivId + '" ></select>');
     
     //add options to select box
     for(let i = 2; i <= STAR_RATING_MAX_STAR_LIMIT; i++ )
     {
         
-        $(formDivId).children().last().append('<option value="'+i+'">'+i+' stars</option>');
+        $('#'+formDivId).children().last().append('<option value="'+i+'">'+i+' stars</option>');
         if(i == 5)
-        $(formDivId).children().last().children().last().prop('selected', true);
+        $('#'+formDivId).children().last().children().last().prop('selected', true);
 
     }
     
@@ -152,13 +152,16 @@ const updateStarCount = (event, starImgPth, emptyStarImgPth) =>{
     //loop through and add new starts
 
     for(let i = 0; i < newNumStars; i++)
-            {
-                chosenImage = (i <= 3)? starImgPth : emptyStarImgPth;
-                //add an input of type 'radio', with relavant attributes. Make display:none so that only label shows, thus providing an image to click
-                $(event.target).siblings('.starRatingDiv')
-                .append('<input type="radio" id="starRating_'+ thisStarId+'_' + i + '" name="' + tempLabel + '" value="'+ i +'" style="visibility:hidden">')  
-                .append('<label for="starRating_'+ thisStarId+'_' + i + '"><img class="starButton" src="'+ chosenImage +'"  width="20" height="20"></img></label>'); 
-            }
+    {
+        chosenImage = (i < 3)? starImgPth : emptyStarImgPth;
+        //add an input of type 'radio', with relavant attributes. Make display:none so that only label shows, thus providing an image to click
+        $(event.target).siblings('.starRatingDiv')
+        .append('<input type="radio" id="starRating_'+ thisStarId+'_' + i + '" name="' + tempLabel + '" value="'+ i +'" style="visibility:hidden">')  
+        .append('<label for="starRating_'+ thisStarId+'_' + i + '"><img class="starButton" src="'+ chosenImage +'"  width="20" height="20"></img></label>'); 
+    }
+
+    console.log('new stars set in view as: ', newNumStars);
+    return newNumStars;
 
 }
 
