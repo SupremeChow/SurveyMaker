@@ -5,6 +5,7 @@
 
 class CheckBox {
 
+    formType='CheckBox';
     idVal;
     position; 
     //parentForm =;
@@ -70,6 +71,10 @@ class CheckBox {
     }
 
     //___________________________ Getters ________________________
+    get type()
+    {
+        return this._formType;
+    }
     get idVal()
     {
         return this._idVal;
@@ -123,6 +128,7 @@ class CheckBox {
     toJSON()
     {
         return {
+            formType : this.formType,
             idVal : this.idVal,
             position : this.position, 
             //parentFormId : this.parentFormId 
@@ -348,10 +354,14 @@ const handleCheckPrefabSubmit = (callingButton) => {
     
 }
 
+const clearCheckInputs = (callingButton) =>{
+
+    let inputOptionId = $(callingButton).attr("multNewOptionId");
+    let inputOptionValId = $(callingButton).attr("multNewOptionValId");
+    $('#' + inputOptionId).val("");
+    $('#' + inputOptionValId).val("");
+}
 
 
 
-//TODO
-//Maybe handle creating the CheckBox for the actual survey in another funtion, that extrapolates from given variables what it looks like
-
-export{createCheckBoxPrefab, handleCheckPrefabSubmit, CheckBox, CheckOption};
+export{createCheckBoxPrefab, handleCheckPrefabSubmit, clearCheckInputs, CheckBox, CheckOption};

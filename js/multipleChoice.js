@@ -5,6 +5,7 @@
 
  class MultipleChoice {
 
+    formType='MultipleChoice';
     idVal;
     position;
     //parentFormId;
@@ -69,6 +70,11 @@
     }
 
     //___________________________ Getters ________________________
+
+    get type()
+    {
+        return this._formType;
+    }
     get idVal()
     {
         return this._idVal;
@@ -134,6 +140,7 @@
     toJSON()
     {
         return {
+            formType : this.formType,
             idVal : this.idVal,
             position : this.position, 
             //parentFormId : this._parentFormId 
@@ -158,6 +165,7 @@ class MultOption{
     position;
     label;
     value;
+    selected = false;
     
     constructor(idVal, position, label, value, selected) ////, forFormId,
     {
@@ -376,7 +384,16 @@ const handleMultPrefabSubmit = (callingButton) => {
         return false;
     }
 
-    
+
 }
 
-export {createMultChoicePrefab, handleMultPrefabSubmit, MultipleChoice, MultOption};
+const clearMultInputs = (callingButton) =>{
+
+    let inputOptionId = $(callingButton).attr("multNewOptionId");
+    let inputOptionValId = $(callingButton).attr("multNewOptionValId");
+    $('#' + inputOptionId).val("");
+    $('#' + inputOptionValId).val("");
+}
+
+
+export {createMultChoicePrefab, handleMultPrefabSubmit, clearMultInputs, MultipleChoice, MultOption};

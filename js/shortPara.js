@@ -6,6 +6,7 @@
 
  class ShortParagraph 
  {
+    formType='ShortParagraph';
     idVal;
     position;
     question;
@@ -35,18 +36,20 @@
  
     //____________________________________________ getters _________________________________
 
-    get idVal(){return this._idVal}
-    get position(){return this._position}
-    get question(){return this._question}
+    get type(){return this._formType }
+    get idVal(){return this._idVal;}
+    get position(){return this._position;}
+    get question(){return this._question;}
     //get label(){return this._label}
-    get characterLim(){return this._characterLim}
-    get placeHolderText(){return this._placeHolderText}
+    get characterLim(){return this._characterLim;}
+    get placeHolderText(){return this._placeHolderText;}
 
     //__________________________________________ Other Methods and functions ________________
 
     toJSON()
     {
         return {
+            formType : this.formType,
             idVal : this.idVal,
             position : this.position,
             question : this.question,

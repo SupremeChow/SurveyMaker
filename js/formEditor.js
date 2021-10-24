@@ -2,9 +2,9 @@ import {addPrefabControlDiv, handleSaveForm, handleEditForm, handleMoveUpForm, h
 //import{} from './buttonEventHandlers.js'
 
 
-import{createCheckBoxPrefab, handleCheckPrefabSubmit, CheckBox, CheckOption} from './checkBox.js'
-import{createMultChoicePrefab, handleMultPrefabSubmit, MultipleChoice, MultOption} from './multipleChoice.js'
-import{createSelectBoxPrefab, handleSelectPrefabSubmit, SelectBox, SelectOption} from './selectBox.js'
+import{createCheckBoxPrefab, handleCheckPrefabSubmit, clearCheckInputs, CheckBox, CheckOption} from './checkBox.js'
+import{createMultChoicePrefab, handleMultPrefabSubmit, clearMultInputs, MultipleChoice, MultOption} from './multipleChoice.js'
+import{createSelectBoxPrefab, handleSelectPrefabSubmit, clearSelectInputs, SelectBox, SelectOption} from './selectBox.js'
 import{createShortAnswerPrefab, handleShortAnsPrefabSubmit, ShortAnswer} from './shortAns.js'
 import{createShortParagraphPrefab, handleShortParaPrefabSubmit, ShortParagraph} from './shortPara.js'
 import{createStarRatingPrefab, updateStarCount, StarRating} from './starRating.js'
@@ -323,27 +323,26 @@ $(document).on('click', '.selectAddOptionButton', (callingButton) =>
         let newOption = $('#' + inputOptionId).val();
         let newOptionVal = $('#' + inputOptionValId).val();
 
-        console.log(newOption, newOptionVal, '---------------');
-
 
         //update object data:  append option to checkOption
 
 
         formList.every((aForm, index) => {
-
-            console.log(aForm.idVal, $(callingButton.target).parent('.formField').attr('id'));
             if(aForm.idVal === $(callingButton.target).parent('.formField').attr('id'))
             {
                 let newSelectOption = new SelectOption(aForm.selectOptions.length, newOption, newOptionVal, false); 
 
                 aForm.selectOptions.push(newSelectOption);
-                console.log(aForm);
                 
                 return false;
             }
             return true;
             
         });
+
+        //clear the inputs when done
+
+        clearSelectInputs(callingButton);
     }
 });
 
@@ -461,6 +460,10 @@ $(document).on('click', '.multAddOptionButton', (callingButton) =>
             return true;
             
         });
+
+        //clear the inputs when done
+
+        clearMultInputs(callingButton);
     }
 });
 
@@ -496,6 +499,9 @@ $(document).on('click', '.checkAddOptionButton ', (callingButton) =>
             return true;
             
         });
+         //clear the inputs when done
+
+         clearCheckInputs(callingButton);
     }
 });
 
@@ -516,12 +522,9 @@ $(document).on('change', '.starCountInput', (event) => {
 
 
     formList.every((aForm, index) => {
-        console.log(aForm.idVal, $(event.target).attr('formDivId')) ;
         if(aForm.idVal === $(event.target).attr('formDivId'))
         {
-            console.log('matcher here...')
             aForm.numStars = numStars;
-            console.log('numstar set as:, and excpeected: ', aForm.numStars, numStars);
             aForm.selectedOption = (numStars > 3) ? 3 : numStars;
             return false;
         }
@@ -715,7 +718,7 @@ $(document).ready(() => {
             //Increment number of SelectBox counter
             selectBoxIdCounter++;
             selectBoxCounter++;
-            $(".selectPrefabDiv").css({"border": "thin double black", "background-color": "rgba(0,100,150,0.15)", "margin" : "3px", "padding": "16px"});
+            
 
 
             //Create div for save/edit/ 

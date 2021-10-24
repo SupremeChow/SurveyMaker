@@ -5,6 +5,7 @@
 
  class SelectBox {
 
+    formType='SelectBox';
     idVal;
     position; 
     //parentForm =;
@@ -70,6 +71,11 @@
     }
 
     //___________________________ Getters ________________________
+
+    get type()
+    {
+        return this._formType;
+    }
     get idVal()
     {
         return this._idVal;
@@ -133,6 +139,7 @@
     toJSON()
     {
         return {
+            formType : this.formType,
             idVal : this.idVal,
             position : this.position, 
             //parentFormId : this.parentFormId 
@@ -324,11 +331,21 @@ const handleSelectPrefabSubmit = (callingButton) => {
            // $('#' + inputOptionValId).val("");
         }
        
-        console.log('Added option... back to you true');
+        
         return true;
     }
     return false;
         
 }
 
-export{createSelectBoxPrefab, handleSelectPrefabSubmit, SelectBox, SelectOption};
+//For clearing inputs after submision
+const clearSelectInputs = (callingButton) =>{
+
+    let inputOptionId = $(callingButton.target).attr("selectnewoptionid");
+    let inputOptionValId = $(callingButton.target).attr("selectnewoptionvalid");
+    $('#' + inputOptionId).val("");
+    $('#' + inputOptionValId).val("");
+
+}
+
+export{createSelectBoxPrefab, handleSelectPrefabSubmit, clearSelectInputs, SelectBox, SelectOption};

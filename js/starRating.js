@@ -6,11 +6,12 @@
 
 class StarRating 
 {
+    formType='StarRating';
     idVal;
     position;
     //parentFormId; //Hold off on this, may be nice to have for db, but no focus right now
     numStars;
-    selectedOption;
+    selectedOption = 3;
     question;
     label;
 
@@ -27,23 +28,24 @@ class StarRating
 
     //___________________________________________ Setters __________________________
 
-    set idVal(newId){this._idVal = newId;};
-    set position(newPosition){this._position = newPosition;};
+    set idVal(newId){this._idVal = newId;}
+    set position(newPosition){this._position = newPosition;}
     //set parentFormId(newParent){}; //Hold off on this, may be nice to have for db, but no focus right now
-    set numStars(newNumStars){this._numStars = newNumStars;};
-    set selectedOption(newSelection){this._selectedOption = newSelection};
-    set question(newQuestion){this._question = newQuestion};
-    set label(newLabel){this._Label = newLabel};
+    set numStars(newNumStars){this._numStars = newNumStars;}
+    set selectedOption(newSelection){this._selectedOption = newSelection}
+    set question(newQuestion){this._question = newQuestion}
+    set label(newLabel){this._Label = newLabel}
 
     //___________________________________________ Getters __________________________
     
-    get idVal(){return this._idVal};
-    get position(){return this._position};
+    get type(){return this._formType;}
+    get idVal(){return this._idVal}
+    get position(){return this._position}
     //get parentFormId(){return this.parentForimId;}; //Hold off on this, may be nice to have for db, but no focus right now
-    get numStars(){return this._numStars};
-    get selectedOption(){return this._selectedOption};
-    get question(){return this._question};
-    get label(){return this._label};
+    get numStars(){return this._numStars}
+    get selectedOption(){return this._selectedOption}
+    get question(){return this._question}
+    get label(){return this._label}
 
 
 
@@ -62,6 +64,7 @@ class StarRating
     toJSON()
     {
         return{ 
+            formType : this.formType,
             idVal : this.idVal,
             position : this.position,
             //parentFormId : this.parentFormId, 

@@ -6,6 +6,7 @@
 
 class ShortAnswer 
 {
+    formType='ShortAnswer';
     idVal;
     position;
     question;
@@ -35,6 +36,8 @@ class ShortAnswer
 
     //____________________________________________ getters _________________________________
 
+
+    get type(){return this._formType;}
     get idVal(){return this._idVal}
     get position(){return this._position}
     get question(){return this._question}
@@ -47,6 +50,7 @@ class ShortAnswer
     toJSON()
     {
         return {
+            formType : this.formType,
             idVal : this.idVal,
             position : this.position,
             question : this.question,
