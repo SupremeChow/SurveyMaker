@@ -5,7 +5,6 @@
 //Creates the universal control buttons for editing related form fields, ie save, edit, delete, move, etc.
 const addPrefabControlDiv = (formDivId, formCountId) =>{
 
-    console.log(formDivId);
 
     //Create div for save/edit/ TODO(delete ,move up, movedown, copy)
 

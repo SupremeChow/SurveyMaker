@@ -28,25 +28,19 @@ Main: As classes are moved to seperate files, start implementing state of form t
     * Setup db to handle submission of survey JSON to save for reconstructing and formating answers
     * Setup and test allowing user to submit form
 
-    * Change default labels to relevant Type+id#
+    * Change default labels to relevant Type+id# (nice to have)
 
     !!! setting the form type out of order (adding two empties, then setting the second to CHeck, first to para)
     !!! makes them appear out of counting order, assign form order on template select
     !!! the labels aren't too important, they are there as temp labels and to distinguish same types
 
-    !! Changed so formTypeSelector gets the formCountId, and increments those values, then gets added
-    !! to formList[] as placeHolders to preserve spot in list
-    !! Will need to 
-        1) implement setting relevant data to new chosen formType when placeholder is destroyed
-        2) Handle looping through formList[] affecting placeholder
+    
 
 
 
-        !!! Label for Paragraph ?????  Still think maybe not necessary.... ***************
 
 
         10/23 Early morning: Main fix now: 
-            * ensure label and header updates change  | check!!!!
             * Tie Publish button to creating JSON of state, and test pushing to php
             * everything else
             
@@ -923,17 +917,39 @@ $(document).ready(() => {
 
         //TESTING JSON
 
-        formList.every((thing)=> {
-            console.log(thing.toJSON());
-        });
+
+        let finalJSON = {
+            "numForms" : formCounter,
+
+            "numSelectBoxes" : selectBoxCounter, 
+            "numParagraphs" : shortParagraphCounter,
+            "numShortAnswers" :shortAnswerCounter, 
+            "numMultipleChoice" : multipleChoiceCounter ,
+            "numCheckBoxes" : checkBoxCounter, 
+            "numStarRatings" : starCounter ,
+
+            "SurveyList" : formList
+
+        };
+
+        console.log(finalJSON);
+
+        const finalJSONString = JSON.stringify(finalJSON);
+
+        //https://www.youtube.com/watch?v=mNrJDGfQGz0 Tell me what to do, oh wise video....
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST','saveSurvey.php');
+        xhr.setRequestHeader('Content-type', 'application/json'); //Note, if ambitious, figure out sending credentials and tokens from author
+        xhr.send(finalJSONString); //It is done....
+
 
         
-
-        $("form").append('<input type="submit" value="Submit Survey">');//'<buton type="submit" form="formStart">Submit Survey</button>');
+        //This button will 'Submit the survey', which we won't do when editing, so is removed
+        //When recreating the survey after publishing, use php to add this back in to allow submission
+       // $("form").append('<input type="submit" value="Submit Survey">');
     
-        //..then, maybe at end place button that will actually submit form
 
-        //then create json/data that will be sent to server to be save...
+
     });
 
 
