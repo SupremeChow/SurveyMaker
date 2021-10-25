@@ -2,6 +2,9 @@
 
 This is a bare bones attempt to making a system that allows a user to create a custom web form for surveys.
 Alot of functionallity isn't working, and most of the things that do work are very basic or are missing some quality of life things.
+This was developed over the course of less than a week, start on 10/18/2021. Prior to then, I had very little experience with web developement, and started from knowing absolutely nothing about JQuery and PHP. Most of learning was on the spot and very quick searches on the internet for resources and answers. Below is a basic description of what was developed so far...
+
+
 
 index.php is the acting entry for creating a survey. The file calls upon various .js files, starting with formEditor.js acting as the main control.
 Other .js files act as models for the various survey formFields, which uses JQuery to update the DOM when the user interacts with them. They also
@@ -22,6 +25,10 @@ the data would be directly into a mySQL db (as a JSON datatype, for convinience)
 
 
 
+__________________________________________________________________________________________________________________________________________________
+
+
+
 (Not yet Completed): The following are features that have been started, or haven't been completed in a working state.
 
  1) The database was built using phpMyAdmin, providing a VERY basic structure of some data that could be held, as well as potential responses from users. There may be some important
@@ -34,5 +41,8 @@ the data would be directly into a mySQL db (as a JSON datatype, for convinience)
 
 3) A more formal entry into the project isn't implemented. Ideally, survey creators will access Index.php to create the survey, and will do so by passing a user authentication token to help track identity of the survey, as well as allow editing. Further more, an ideal system would allow the survey taker to access takeSurvey.php via a link, which would include the surveyID in the address ala GET request. This would then allow take survey to parse this id and pull the relevant form from the db. Because submission of a suvery isn't working, or storing one effectively for that matter, this isn't a main task.
   
+4) Missing Bugs and cleanup. There may be some missing bugs I am unaware of, and alot of comment code could be cleaned up. Since this isn't in full release, it's not that big of a concern. But just a fair warning some lines of codes are left haphazzardly around, and could be cleaned up for better presentation.
+
+5) CSS. Styling wasn't a priority for this project. I was more intent in building the functionality (plus, I was learning JQuery and PHP on the sport from the ground up, so styling wasn't on the top of things to do). For that reason, only a basic styling was provided to differentiate formFields. 
   
   
