@@ -220,3 +220,103 @@ $sqlResultFiltered = ($sqlResult->fetch_row())[0];
 
 makeSurvey($sqlResultFiltered, false);
 
+
+
+
+
+
+
+
+//____________________________________ Saving data ____________________
+
+//Go through as if doing surveyReconstructor, but instead extrapoating parts and inserting in DB
+
+$surveyJSON = json_decode($surveyJSON, false);
+
+
+     $theSurveyList = $surveyJSON->SurveyList;
+ 
+ 
+ 
+     //Counters and number of formFields
+ 
+     $totalForms = $surveyJSON->numForms;
+     $formFieldCounter = 0;
+ 
+     $numSelectForms = $surveyJSON->numSelectBoxes ;
+     $selectFormCounter = 0;
+ 
+ 
+     $numParagraphForms = $surveyJSON->numParagraphs ;
+     $paragraphFormCounter = 0;
+ 
+ 
+     $numShortAnswerForms = $surveyJSON-> numShortAnswers;
+     $shortAnswerFormCounter = 0;
+ 
+ 
+     $numMultpleChoiceForms = $surveyJSON->numMultipleChoice ;
+     $multipleChoiceFormCounter = 0;
+ 
+ 
+     $numCheckBoxForms = $surveyJSON-> numCheckBoxes;
+     $checkBoxFormCounter = 0;
+ 
+ 
+     $numStarRatingForms = $surveyJSON-> numStarRatings;
+     $starRatingFormCounter = 0;
+ 
+ 
+ 
+     foreach($theSurveyList as $form) //got throug each survey...
+     {
+         switch($form->formType){
+             case 'CheckBox':
+                 
+                 
+                 $checkBoxFormCounter++;
+                 $formFieldCounter++;
+                 break;
+             
+             case 'MultipleChoice':
+                
+                 $multipleChoiceFormCounter++;
+                 $formFieldCounter++;
+ 
+             break;
+ 
+             case 'SelectBox':
+                 
+                 $selectFormCounter++;
+                 $formFieldCounter++;
+ 
+             break;
+ 
+             case 'ShortAnswer':
+                 
+                 $shortAnswerFormCounter++;
+                 $formFieldCounter++;
+ 
+             break;
+ 
+             case 'ShortParagraph':
+                 
+                 $paragraphFormCounter++;
+                 $formFieldCounter++;
+ 
+             break;
+ 
+             case 'StarRating':
+                 
+                 $starRatingFormCounter++;
+                 $formFieldCounter++;
+ 
+             break;
+         }
+     }
+
+
+
+
+
+

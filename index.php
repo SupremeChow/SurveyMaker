@@ -5,19 +5,19 @@
 		<meta charset="utf-8">
 		<title></title>
 		<!-- Uncomment when wanting to use CDN of Jquery on release -->
-		<!--
+		
 			<script
 			  src="https://code.jquery.com/jquery-3.6.0.min.js"
 			  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
 			  crossorigin="anonymous"></script>
-			 -->
+			 
 
-		<!-- Comment out when done developing. This imports jquery from local folder -->
-		<script src="../jquery/jquery-3.6.0.js"></script>
+		<!-- Comment out when done developing. This imports jquery from local folder 
+		<script src="../jquery/jquery-3.6.0.js"></script>-->
 
 		<!-- Importing own scripts here -->
 		<script type="module" src="js/formEditor.js"></script>
-		
+
 		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>

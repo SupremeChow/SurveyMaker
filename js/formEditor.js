@@ -962,36 +962,8 @@ $(document).ready(() => {
             }
           });
 
-          /*
-        $.post('saveSurvey.php', finalJSONString , function(responseText) {
-            $('html').load(responseText);
-            
-        });
-        */
+          
         
-        /*
-        const xhr = new XMLHttpRequest();
-
-        //Try this to load
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4 && xhr=== 200) {
-              //load the response page
-              $('window').load(xhr.response);
-            }
-            else
-            {
-                //on all other states
-                $('body').replaceWith('<div><h1>Submitting, Generating Preview</h1></div>');
-            }
-          }
-
-
-        xhr.open('POST','saveSurvey.php');
-        xhr.setRequestHeader('Content-type', 'application/json'); //Note, if ambitious, figure out sending credentials and tokens from author
-        xhr.send(finalJSONString); //It is done....
-
-        */
-
         
 
         

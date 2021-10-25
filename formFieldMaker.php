@@ -25,7 +25,7 @@ function createCheckBox($theForm , $idVal, $checkBoxIdNumber, $arrayOfOptions)
 
 
                 echo'
-                <input type="checkbox" id="'. $arrayOfOptions[$i]->idVal . '" name="' . $theForm->label . '" value="' . $arrayOfOptions[$i]->value . '" >
+                <input type="checkbox" id="'. $arrayOfOptions[$i]->idVal . '" name="checkBox_' . $checkBoxIdNumber . '" value="' . $arrayOfOptions[$i]->value . '" >
                 <label for="' . $arrayOfOptions[$i]->idVal . '">'. $arrayOfOptions[$i]->label .'</label>
 
                 ';
@@ -58,7 +58,7 @@ function createMultipleChoice($theForm , $idVal, $multiplChoiceIdNumber, $arrayO
         </label>
 
 
-        <div id="multipleChoice_' . $multiplChoiceIdNumber . '">
+        <div id="multipleChoice_' . $multiplChoiceIdNumber . '" >
     ';
 
             //Put options here....
@@ -69,7 +69,7 @@ function createMultipleChoice($theForm , $idVal, $multiplChoiceIdNumber, $arrayO
                 //TODO for now, hope that things stay in order, otherwise need to reorder with position
 
                 echo'
-                <input type="radio" id="'. $arrayOfOptions[$i]->idVal . '" name="' . $theForm->label . '" value="' . $arrayOfOptions[$i]->value . '" >
+                <input type="radio" id="'. $arrayOfOptions[$i]->idVal . '" name="multipleChoice_' . $multiplChoiceIdNumber . '" value="' . $arrayOfOptions[$i]->value . '" >
                 <label for="' . $arrayOfOptions[$i]->idVal . '">'. $arrayOfOptions[$i]->label .'</label>
 
                 ';
@@ -98,7 +98,7 @@ function createSelectBox($theForm , $idVal, $selectIdNumber, $arrayOfOptions)
             ' . $theForm->label . '
         </label>
 
-        <select id="selectBox_' .  $selectIdNumber .  '">
+        <select id="selectBox_' .  $selectIdNumber .  '" name="selectBox_'. $selectIdNumber .'">
     ';
         //place options here...
 
@@ -137,7 +137,7 @@ function createShortAnswer($theForm , $idVal, $shortAnswerIdNumber)
             </label>
 
 
-            <input type="text" id="shortAnsTextArea_'. $shortAnswerIdNumber . '" name="shortAns_' . $shortAnswerIdNumber . '" placeholder="' . $theForm->placeHolderText . '"  maxlength="'. $theForm->characterLim .'"><br>
+            <input type="text" id="shortAnsTextArea_'. $shortAnswerIdNumber . '" name="shortAnswer_' . $shortAnswerIdNumber . '" placeholder="' . $theForm->placeHolderText . '"  maxlength="'. $theForm->characterLim .'"><br>
         
         </div>
     ';
@@ -152,7 +152,7 @@ function createParagraph($theForm , $idVal, $paragraphIdNumber)
                 ' . $theForm->question . '
             </label><br>
 
-            <textarea id="shortParaTextArea_' . $paragraphIdNumber . '" name="shortPara_' . $paragraphIdNumber . '" placeholder="'. $theForm->placeHolderText .'" rows="5" cols="64" maxlength="'. $theForm->characterLim .'">
+            <textarea id="shortParaTextArea_' . $paragraphIdNumber . '" name="shortParagraph_' . $paragraphIdNumber . '" placeholder="'. $theForm->placeHolderText .'" rows="5" cols="64" maxlength="'. $theForm->characterLim .'">
             </textarea><br>
         
         </div>
@@ -184,7 +184,7 @@ function createStarRating($theForm , $idVal, $starRatingIdNumber)
             //add an input of type 'radio', with relavant attributes. Make display:none so that only label shows, thus providing an image to click
             
             echo'
-                <input type="radio" id="starRating_' . $starRatingIdNumber . '_' . $i . '" name="' . $theForm->label . '_' . $starRatingIdNumber . '" value="'. $i .'" style="visibility:hidden">
+                <input type="radio" id="starRating_' . $starRatingIdNumber . '_' . $i . '" name="starRating_' . $starRatingIdNumber . '" value="'. $i .'" style="visibility:hidden">
                 <label for="starRating_'. $starRatingIdNumber .'_' . $i . '"><img class="starButton" src="'. $chosenImage .'"  width="20" height="20"></img></label>
             ';
         }
