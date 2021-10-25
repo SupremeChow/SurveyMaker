@@ -95,7 +95,7 @@ $receivedSurveyJSON = file_get_contents('php://input'); //grab the POST'ed JSON 
 //TODO NOT WORKING..............................................................
 
 //Go through as if doing surveyReconstructor, but instead extrapoating parts and inserting in DB
-
+/*
 $surveyJSON = json_decode($surveyJSON, false);
 
 
@@ -180,7 +180,7 @@ $surveyJSON = json_decode($surveyJSON, false);
          }
      }
 
-
+*/
 
 
 
@@ -311,11 +311,11 @@ $sqlResult = mysqli_query($dbConnection, $sqlCommand);
 $sqlResultFiltered = ($sqlResult->fetch_row())[0];
 
 
-
+*/
 
 
 //Take the results from above and build a site from it
 
-makeSurvey($sqlResultFiltered, false);
+makeSurvey($receivedSurveyJSON, true);
 
-*/
+
