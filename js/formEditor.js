@@ -924,7 +924,6 @@ $(document).ready(() => {
 
         };
 
-        console.log(finalJSON);
 
 
         

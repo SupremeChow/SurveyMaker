@@ -20,9 +20,7 @@ function createCheckBox($theForm , $idVal, $checkBoxIdNumber, $arrayOfOptions)
             //Function for adding all options
             for($i = 0; $i < count($arrayOfOptions); $i++)
             {
-
                 //TODO for now, hope that things stay in order, otherwise need to reorder with position
-
 
                 echo'
                 <input type="checkbox" id="'. $arrayOfOptions[$i]->idVal . '" name="checkBox_' . $checkBoxIdNumber . '" value="' . $arrayOfOptions[$i]->value . '" >

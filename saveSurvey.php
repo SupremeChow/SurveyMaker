@@ -11,20 +11,6 @@
     7) Set up system, author creates, saves, gets put into json and placed in mysql, allow user to go to page that will call json
         data and get rebuilt into the webpage survey for submission | ...
 
-        //Using this to figure out sending JSON to php
-        https://www.youtube.com/watch?v=mNrJDGfQGz0
-
-
-        JSON Structure:
-
-        "numSelectBoxes" : selectBoxCounter, 
-        "numParagraphs" : shortParagraphCounter,
-        "numShortAnswers" :shortAnswerCounter, 
-        "numMultipleChoice" : multipleChoiceCounter ,
-        "numCheckBoxes" : checkBoxCounter, 
-        "numStarRatings" : starCounter ,
-
-        "SurveyList" : formList
 
 
 
@@ -61,7 +47,7 @@ ini_set('display_errors', 1);
 
 //TODO for now, work in DB named 'TestSurveyDB', for building. When finalized with schema, move everything to appropriately named
 //SurveyDB
-$dbConnection = mysqli_connect('localhost', 'SurveyAuthor', 'ABC123**', 'TestSurveyDB');
+$dbConnection = mysqli_connect('localhost', 'SurveyAuthor', 'ABC123**', 'surveyMakerDB');
 
 //check connection
 
@@ -86,23 +72,6 @@ include('surveyReconstructor.php');
 
 
 
-/*
-    //Example of using XMLRequest to send the data
-    //Originally used to send the JSON here, but could use to post to server
-
-    const finalJSONString = JSON.stringify(finalJSON);
-
-        //https://www.youtube.com/watch?v=mNrJDGfQGz0 Tell me what to do, oh wise video....
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST','saveSurvey.php');
-        xhr.setRequestHeader('Content-type', 'application/json'); //Note, if ambitious, figure out sending credentials and tokens from author
-        xhr.send(finalJSONString); //It is done....
-
-
-*/ 
-
-
-
 
 
 
@@ -112,10 +81,136 @@ $receivedSurveyJSON = file_get_contents('php://input'); //grab the POST'ed JSON 
 
 
 
-$decodedJSON = json_decode($receivedSurveyJSON, true); //Decode, for SQL (Reconstructor already decodes, may need to send this instead since pulling from DB will be object)
+// $decodedJSON = json_decode($receivedSurveyJSON, true); //Decode, for SQL (Reconstructor already decodes, may need to send this instead since pulling from DB will be object)
 
-$encodedJSON = json_encode($decodedJSON);
+// $encodedJSON = json_encode($decodedJSON);
 
+
+
+
+
+
+//____________________________________ Saving data ____________________
+
+//TODO NOT WORKING..............................................................
+
+//Go through as if doing surveyReconstructor, but instead extrapoating parts and inserting in DB
+
+$surveyJSON = json_decode($surveyJSON, false);
+
+
+     $theSurveyList = $surveyJSON->SurveyList;
+ 
+ 
+ 
+     //Counters and number of formFields
+ 
+     $totalForms = $surveyJSON->numForms;
+     $formFieldCounter = 0;
+ 
+     $numSelectForms = $surveyJSON->numSelectBoxes ;
+     $selectFormCounter = 0;
+ 
+ 
+     $numParagraphForms = $surveyJSON->numParagraphs ;
+     $paragraphFormCounter = 0;
+ 
+ 
+     $numShortAnswerForms = $surveyJSON-> numShortAnswers;
+     $shortAnswerFormCounter = 0;
+ 
+ 
+     $numMultpleChoiceForms = $surveyJSON->numMultipleChoice ;
+     $multipleChoiceFormCounter = 0;
+ 
+ 
+     $numCheckBoxForms = $surveyJSON-> numCheckBoxes;
+     $checkBoxFormCounter = 0;
+ 
+ 
+     $numStarRatingForms = $surveyJSON-> numStarRatings;
+     $starRatingFormCounter = 0;
+ 
+ 
+ 
+     foreach($theSurveyList as $form) //got throug each survey and save...
+     {
+         switch($form->formType){
+             case 'CheckBox':
+                 
+                 
+                 $checkBoxFormCounter++;
+                 $formFieldCounter++;
+                 break;
+             
+             case 'MultipleChoice':
+                
+                 $multipleChoiceFormCounter++;
+                 $formFieldCounter++;
+ 
+             break;
+ 
+             case 'SelectBox':
+                 
+                 $selectFormCounter++;
+                 $formFieldCounter++;
+ 
+             break;
+ 
+             case 'ShortAnswer':
+                 
+                 $shortAnswerFormCounter++;
+                 $formFieldCounter++;
+ 
+             break;
+ 
+             case 'ShortParagraph':
+                 
+                 $paragraphFormCounter++;
+                 $formFieldCounter++;
+ 
+             break;
+ 
+             case 'StarRating':
+                 
+                 $starRatingFormCounter++;
+                 $formFieldCounter++;
+ 
+             break;
+         }
+     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     
+
+//_______________________________ DB TESTS _____________ DELETE LATER___________________
 
 
 //Don't use this, not great for JSON (i think?), better for just POSTing Survey (ie key-value pair list)
@@ -171,19 +266,19 @@ else{
 
 //                                                                              VVVVV Dummy
 
-$sqlCommand = 'INSERT INTO surveyjson (id, surveyId , surveyJSON) VALUES (NULL, "1234a56" ,  ? )'; // ? is a place holder
+// $sqlCommand = 'INSERT INTO surveyjson (id, surveyId , surveyJSON) VALUES (NULL, "1234a56" ,  ? )'; // ? is a place holder
 
 
 
-if($stmt = $dbConnection->prepare($sqlCommand)) //Check if sqlCommand is valid, returns true if no error in formating
-{
-    $stmt->bind_param('s', $receivedSurveyJSON ); //Bind the JSON varialbe receivedSurveyJSON to the place holder '?' ('s' stands for string, can place multiple place holder and use 'ssis...')
-    $stmt->execute(); //run the command
-}
-else{
-    $error = $dbConnection->errno . ' ' . $dbConnection->error;
-    echo $error; // 1054 Unknown column 'foo' in 'field list'
-}
+// if($stmt = $dbConnection->prepare($sqlCommand)) //Check if sqlCommand is valid, returns true if no error in formating
+// {
+//     $stmt->bind_param('s', $receivedSurveyJSON ); //Bind the JSON varialbe receivedSurveyJSON to the place holder '?' ('s' stands for string, can place multiple place holder and use 'ssis...')
+//     $stmt->execute(); //run the command
+// }
+// else{
+//     $error = $dbConnection->errno . ' ' . $dbConnection->error;
+//     echo $error; // 1054 Unknown column 'foo' in 'field list'
+// }
 
 
 //VVVVVVVVVVVVVVVVVVV DOesn't really work, use above instead
@@ -205,6 +300,9 @@ else{
 
 //__________ This will grab the JSON, grab the only result (since limit row 1), and recreates page ______________________
 
+
+/*
+
 $sqlCommand = "SELECT surveyJSON FROM surveyjson LIMIT 1";//"INSERT INTO surveyjson (surveyId , surveyJSON) VALUES (1234a56 ,  $receivedSurveyJSON )";
 
 $sqlResult = mysqli_query($dbConnection, $sqlCommand);
@@ -220,103 +318,4 @@ $sqlResultFiltered = ($sqlResult->fetch_row())[0];
 
 makeSurvey($sqlResultFiltered, false);
 
-
-
-
-
-
-
-
-//____________________________________ Saving data ____________________
-
-//Go through as if doing surveyReconstructor, but instead extrapoating parts and inserting in DB
-
-$surveyJSON = json_decode($surveyJSON, false);
-
-
-     $theSurveyList = $surveyJSON->SurveyList;
- 
- 
- 
-     //Counters and number of formFields
- 
-     $totalForms = $surveyJSON->numForms;
-     $formFieldCounter = 0;
- 
-     $numSelectForms = $surveyJSON->numSelectBoxes ;
-     $selectFormCounter = 0;
- 
- 
-     $numParagraphForms = $surveyJSON->numParagraphs ;
-     $paragraphFormCounter = 0;
- 
- 
-     $numShortAnswerForms = $surveyJSON-> numShortAnswers;
-     $shortAnswerFormCounter = 0;
- 
- 
-     $numMultpleChoiceForms = $surveyJSON->numMultipleChoice ;
-     $multipleChoiceFormCounter = 0;
- 
- 
-     $numCheckBoxForms = $surveyJSON-> numCheckBoxes;
-     $checkBoxFormCounter = 0;
- 
- 
-     $numStarRatingForms = $surveyJSON-> numStarRatings;
-     $starRatingFormCounter = 0;
- 
- 
- 
-     foreach($theSurveyList as $form) //got throug each survey...
-     {
-         switch($form->formType){
-             case 'CheckBox':
-                 
-                 
-                 $checkBoxFormCounter++;
-                 $formFieldCounter++;
-                 break;
-             
-             case 'MultipleChoice':
-                
-                 $multipleChoiceFormCounter++;
-                 $formFieldCounter++;
- 
-             break;
- 
-             case 'SelectBox':
-                 
-                 $selectFormCounter++;
-                 $formFieldCounter++;
- 
-             break;
- 
-             case 'ShortAnswer':
-                 
-                 $shortAnswerFormCounter++;
-                 $formFieldCounter++;
- 
-             break;
- 
-             case 'ShortParagraph':
-                 
-                 $paragraphFormCounter++;
-                 $formFieldCounter++;
- 
-             break;
- 
-             case 'StarRating':
-                 
-                 $starRatingFormCounter++;
-                 $formFieldCounter++;
- 
-             break;
-         }
-     }
-
-
-
-
-
-
+*/

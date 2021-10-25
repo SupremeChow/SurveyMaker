@@ -36,26 +36,10 @@ function createHtmlTop()
     ';
 }
 
-//use boolean $isPreview to prevent button press
+
 function createHtmlBottom()
 {
-    // if($isPreview)
-    // {
-    //     echo '
-    //         <button class="previewButton" type="button">Submit Disabled</button>
-    //     ';
-    // }
-    // else
-    // {
-    //     echo '
-    //             <input type="submit" value="Submit Survey">
-    //     ';
-    // }
-        
-
     
-        //     </form>
-        //  </div>
          echo'
         <!-- for now use static css for handling footer -->
 		<div class="footer" style="padding:10px;  position:relative; top: 500px; width:100% ">
